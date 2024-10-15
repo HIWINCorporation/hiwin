@@ -10,7 +10,7 @@
 
   <license>BSD</license>
 
-  <url type="repository">https://github.com/frankaemika/franka_ros</url>
+  <url type="repository">https://github.com/HIWINCorporation/hiwin_ros.git</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
