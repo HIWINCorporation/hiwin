@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="name" value="hiwin"/>
+  <arg name="ra_type" value="ra605_710"/>
+
+  <group ns="test_ra">
+    <include file="$(find hiwin_description)/launch/view_ra.launch"/>
+  </group>
+</launch>

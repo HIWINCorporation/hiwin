@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="name" default="hiwin" />
+  <arg name="ra_type" default="ra610_1869" />
+
+  <param name="robot_description" command="$(find xacro)/xacro '$(find hiwin_description)/urdf/ra.urdf.xacro' name:=$(arg name) ra_type:=$(arg ra_type)" />
+
+  <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hiwin_description)/rviz/view_robot.rviz" required="true" />
+</launch>

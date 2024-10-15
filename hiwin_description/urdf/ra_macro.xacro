@@ -1,0 +1,248 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="arm">
+  <xacro:include filename="$(find hiwin_description)/urdf/inc/common.xacro" />
+
+  <xacro:macro name="hiwin_arm"
+    params="
+    name
+    tf_prefix
+    parent
+    *origin
+    joint_limits_parameters_file
+    kinematics_parameters_file
+    visual_parameters_file
+    ">
+
+    <!-- Load configuration data from the provided .yaml files -->
+    <xacro:read_arm_model_data joint_limits_parameters_file="${joint_limits_parameters_file}"
+      kinematics_parameters_file="${kinematics_parameters_file}"
+      visual_parameters_file="${visual_parameters_file}">
+    </xacro:read_arm_model_data>
+
+    <link name="${tf_prefix}base_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="base" type="visual" />
+        </geometry>
+        <material name="LightGrey">
+          <color rgba="0.7 0.7 0.7 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="base" type="collision" />
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${tf_prefix}link_1">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_1" type="visual" />
+        </geometry>
+        <material name="LightGrey">
+          <color rgba="0.7 0.7 0.7 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_1" type="collision" />
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${tf_prefix}link_2">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_2" type="visual" />
+        </geometry>
+        <material name="LightGrey">
+          <color rgba="0.7 0.7 0.7 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_2" type="collision" />
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${tf_prefix}link_3">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_3" type="visual" />
+        </geometry>
+        <material name="LightGrey">
+          <color rgba="0.7 0.7 0.7 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_3" type="collision" />
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${tf_prefix}link_4">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_4" type="visual" />
+        </geometry>
+        <material name="LightGrey">
+          <color rgba="0.7 0.7 0.7 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_4" type="collision" />
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${tf_prefix}link_5">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_5" type="visual" />
+        </geometry>
+        <material name="LightGrey">
+          <color rgba="0.7 0.7 0.7 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_5" type="collision" />
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${tf_prefix}link_6">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_6" type="visual" />
+        </geometry>
+        <material name="LightGrey">
+          <color rgba="0.7 0.7 0.7 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <xacro:get_mesh name="link_6" type="collision" />
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- base_joint fixes base_link to the environment -->
+    <joint name="${tf_prefix}base_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="${tf_prefix}base_link" />
+    </joint>
+
+    <!-- joints - main serial chain -->
+    <joint name="${tf_prefix}joint_1" type="revolute">
+      <origin xyz="${joint_1_x} ${joint_1_y} ${joint_1_z}"
+        rpy="${joint_1_roll} ${joint_1_pitch} ${joint_1_yaw}" />
+      <parent link="${tf_prefix}base_link" />
+      <child link="${tf_prefix}link_1" />
+      <axis xyz="0 0 1" />
+      <limit lower="${joint_1_lower_limit}" upper="${joint_1_upper_limit}"
+        effort="${joint_1_effort_limit}" velocity="${joint_1_velocity_limit}" />
+    </joint>
+
+    <joint name="${tf_prefix}joint_2" type="revolute">
+      <origin xyz="${joint_2_x} ${joint_2_y} ${joint_2_z}"
+        rpy="${joint_2_roll} ${joint_2_pitch} ${joint_2_yaw}" />
+      <parent link="${tf_prefix}link_1" />
+      <child link="${tf_prefix}link_2" />
+      <axis xyz="1 0 0" />
+      <limit lower="${joint_2_lower_limit}" upper="${joint_2_upper_limit}"
+        effort="${joint_2_effort_limit}" velocity="${joint_2_velocity_limit}" />
+    </joint>
+
+    <joint name="${tf_prefix}joint_3" type="revolute">
+      <origin xyz="${joint_3_x} ${joint_3_y} ${joint_3_z}"
+        rpy="${joint_3_roll} ${joint_3_pitch} ${joint_3_yaw}" />
+      <parent link="${tf_prefix}link_2" />
+      <child link="${tf_prefix}link_3" />
+      <axis xyz="1 0 0" />
+      <limit lower="${joint_3_lower_limit}" upper="${joint_3_upper_limit}"
+        effort="${joint_3_effort_limit}" velocity="${joint_3_velocity_limit}" />
+    </joint>
+
+    <joint name="${tf_prefix}joint_4" type="revolute">
+      <origin xyz="${joint_4_x} ${joint_4_y} ${joint_4_z}"
+        rpy="${joint_4_roll} ${joint_4_pitch} ${joint_4_yaw}" />
+      <parent link="${tf_prefix}link_3" />
+      <child link="${tf_prefix}link_4" />
+      <axis xyz="0 1 0" />
+      <limit lower="${joint_4_lower_limit}" upper="${joint_4_upper_limit}"
+        effort="${joint_4_effort_limit}" velocity="${joint_4_velocity_limit}" />
+    </joint>
+
+    <joint name="${tf_prefix}joint_5" type="revolute">
+      <origin xyz="${joint_5_x} ${joint_5_y} ${joint_5_z}"
+        rpy="${joint_5_roll} ${joint_5_pitch} ${joint_5_yaw}" />
+      <parent link="${tf_prefix}link_4" />
+      <child link="${tf_prefix}link_5" />
+      <axis xyz="1 0 0" />
+      <limit lower="${joint_5_lower_limit}" upper="${joint_5_upper_limit}"
+        effort="${joint_5_effort_limit}" velocity="${joint_5_velocity_limit}" />
+    </joint>
+
+    <joint name="${tf_prefix}joint_6" type="revolute">
+      <origin xyz="${joint_6_x} ${joint_6_y} ${joint_6_z}"
+        rpy="${joint_6_roll} ${joint_6_pitch} ${joint_6_yaw}" />
+      <parent link="${tf_prefix}link_5" />
+      <child link="${tf_prefix}link_6" />
+      <axis xyz="0 1 0" />
+      <limit lower="${joint_6_lower_limit}" upper="${joint_6_upper_limit}"
+        effort="${joint_6_effort_limit}" velocity="${joint_6_velocity_limit}" />
+    </joint>
+
+    <!-- ROS-Industrial 'base' frame - base_link to HIWIN 'Base' Coordinates transform -->
+    <link name="${tf_prefix}base" />
+    <joint name="${tf_prefix}base_link-base_fixed_joint" type="fixed">
+      <!-- Note the rotation over Z of pi radians - as base_link is REP-103
+           aligned (i.e., has X+ forward, Y+ left and Z+ up), this is needed
+           to correctly align 'base' with the 'Base' coordinate system of
+           the HIWIN controller.
+      -->
+      <origin xyz="0 0 ${joint_1_z}" rpy="0 0 0" />
+      <parent link="${tf_prefix}base_link" />
+      <child link="${tf_prefix}base" />
+    </joint>
+
+    <!-- ROS-Industrial 'flange' frame - attachment point for EEF models -->
+    <link name="${tf_prefix}flange" />
+    <joint name="${tf_prefix}flange" type="fixed">
+      <parent link="${tf_prefix}link_6" />
+      <child link="${tf_prefix}flange" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+
+    <!-- ROS-Industrial 'tool0' frame - all-zeros tool frame -->
+    <link name="${tf_prefix}tool0" />
+    <joint name="${tf_prefix}flange-tool0" type="fixed">
+      <!-- default toolframe - X+ left, Y+ up, Z+ front -->
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${tf_prefix}flange" />
+      <child link="${tf_prefix}tool0" />
+    </joint>
+
+  </xacro:macro>
+
+</robot>

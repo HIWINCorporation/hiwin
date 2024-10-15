@@ -1,0 +1,43 @@
+kinematics:
+  joint_1:
+    x: 0
+    y: 0
+    z: 0.375
+    roll: 0
+    pitch: 0
+    yaw: 0
+  joint_2:
+    x: 0
+    y: 0.03
+    z: 0
+    roll: 0
+    pitch: 0
+    yaw: 0
+  joint_3:
+    x: 0
+    y: 0
+    z: 0.34
+    roll: 0
+    pitch: 0
+    yaw: 0
+  joint_4:
+    x: 0
+    y: 0
+    z: 0.04
+    roll: 0
+    pitch: 0
+    yaw: 0
+  joint_5:
+    x: 0
+    y: 0.338
+    z: 0
+    roll: 0
+    pitch: 0
+    yaw: 0
+  joint_6:
+    x: 0
+    y: 0.0865
+    z: 0
+    roll: 0
+    pitch: 0
+    yaw: 0

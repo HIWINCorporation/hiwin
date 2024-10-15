@@ -1,0 +1,31 @@
+joint_limits:
+  joint_1:
+    max_effort: 56.0
+    max_position: !degrees 170.0
+    max_velocity: !degrees 192.0
+    min_position: !degrees -170.0
+  joint_2:
+    max_effort: 56.0
+    max_position: !degrees 95.0
+    max_velocity: !degrees 206.0
+    min_position: !degrees -150.0
+  joint_3:
+    max_effort: 56.0
+    max_position: !degrees 185.0
+    max_velocity: !degrees 219.0
+    min_position: !degrees -85.0
+  joint_4:
+    max_effort: 16.9
+    max_position: !degrees 190.0
+    max_velocity: !degrees 450.0
+    min_position: !degrees -190.0
+  joint_5:
+    max_effort: 16.9
+    max_position: !degrees 135.0
+    max_velocity: !degrees 450.0
+    min_position: !degrees -135.0
+  joint_6:
+    max_effort: 10.98
+    max_position: !degrees 360.0
+    max_velocity: !degrees 720.0
+    min_position: !degrees -360.0

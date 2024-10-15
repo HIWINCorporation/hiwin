@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <xacro:macro name="get_visual_params" params="name:=^ type:=^">
+    <xacro:property name="visual_params" value="${sec_mesh_files[name][type]}" scope="parent" />
+  </xacro:macro>
+
+  <xacro:macro name="get_mesh_path" params="name:=^ type:=^">
+    <xacro:get_visual_params />
+    <xacro:property name="mesh"
+      value="package://${visual_params['mesh']['package']}/${visual_params['mesh']['path']}"
+      scope="parent" />
+  </xacro:macro>
+
+  <xacro:macro name="get_mesh" params="name type">
+    <xacro:get_mesh_path />
+    <mesh filename="${mesh}" scale="1 1 1" />
+  </xacro:macro>
+
+  <xacro:macro name="read_arm_model_data"
+    params="joint_limits_parameters_file kinematics_parameters_file visual_parameters_file">
+    <!-- Read .yaml files from disk, load content into properties -->
+    <xacro:property name="config_joint_limit_parameters"
+      value="${xacro.load_yaml(joint_limits_parameters_file)}" />
+    <xacro:property name="config_kinematics_parameters"
+      value="${xacro.load_yaml(kinematics_parameters_file)}" />
+    <xacro:property name="config_visual_parameters"
+      value="${xacro.load_yaml(visual_parameters_file)}" />
+
+    <!-- Extract subsections from yaml dictionaries -->
+    <xacro:property name="sec_limits" value="${config_joint_limit_parameters['joint_limits']}" />
+    <xacro:property name="sec_kinematics" value="${config_kinematics_parameters['kinematics']}" />
+    <xacro:property name="sec_mesh_files" value="${config_visual_parameters['mesh_files']}"
+      scope="parent" />
+
+    <!-- JOINTS LIMIT PARAMETERS -->
+    <xacro:property name="joint_1_lower_limit" value="${sec_limits['joint_1']['min_position']}"
+      scope="parent" />
+    <xacro:property name="joint_1_upper_limit" value="${sec_limits['joint_1']['max_position']}"
+      scope="parent" />
+    <xacro:property name="joint_1_velocity_limit" value="${sec_limits['joint_1']['max_velocity']}"
+      scope="parent" />
+    <xacro:property name="joint_1_effort_limit" value="${sec_limits['joint_1']['max_effort']}"
+      scope="parent" />
+    <xacro:property name="joint_2_lower_limit" value="${sec_limits['joint_2']['min_position']}"
+      scope="parent" />
+    <xacro:property name="joint_2_upper_limit" value="${sec_limits['joint_2']['max_position']}"
+      scope="parent" />
+    <xacro:property name="joint_2_velocity_limit" value="${sec_limits['joint_2']['max_velocity']}"
+      scope="parent" />
+    <xacro:property name="joint_2_effort_limit" value="${sec_limits['joint_2']['max_effort']}"
+      scope="parent" />
+    <xacro:property name="joint_3_lower_limit" value="${sec_limits['joint_3']['min_position']}"
+      scope="parent" />
+    <xacro:property name="joint_3_upper_limit" value="${sec_limits['joint_3']['max_position']}"
+      scope="parent" />
+    <xacro:property name="joint_3_velocity_limit" value="${sec_limits['joint_3']['max_velocity']}"
+      scope="parent" />
+    <xacro:property name="joint_3_effort_limit" value="${sec_limits['joint_3']['max_effort']}"
+      scope="parent" />
+    <xacro:property name="joint_4_lower_limit" value="${sec_limits['joint_4']['min_position']}"
+      scope="parent" />
+    <xacro:property name="joint_4_upper_limit" value="${sec_limits['joint_4']['max_position']}"
+      scope="parent" />
+    <xacro:property name="joint_4_velocity_limit" value="${sec_limits['joint_4']['max_velocity']}"
+      scope="parent" />
+    <xacro:property name="joint_4_effort_limit" value="${sec_limits['joint_4']['max_effort']}"
+      scope="parent" />
+    <xacro:property name="joint_5_lower_limit" value="${sec_limits['joint_5']['min_position']}"
+      scope="parent" />
+    <xacro:property name="joint_5_upper_limit" value="${sec_limits['joint_5']['max_position']}"
+      scope="parent" />
+    <xacro:property name="joint_5_velocity_limit" value="${sec_limits['joint_5']['max_velocity']}"
+      scope="parent" />
+    <xacro:property name="joint_5_effort_limit" value="${sec_limits['joint_5']['max_effort']}"
+      scope="parent" />
+    <xacro:property name="joint_6_lower_limit" value="${sec_limits['joint_6']['min_position']}"
+      scope="parent" />
+    <xacro:property name="joint_6_upper_limit" value="${sec_limits['joint_6']['max_position']}"
+      scope="parent" />
+    <xacro:property name="joint_6_velocity_limit" value="${sec_limits['joint_6']['max_velocity']}"
+      scope="parent" />
+    <xacro:property name="joint_6_effort_limit" value="${sec_limits['joint_6']['max_effort']}"
+      scope="parent" />
+
+    <!-- kinematics -->
+    <xacro:property name="joint_1_x" value="${sec_kinematics['joint_1']['x']}" scope="parent" />
+    <xacro:property name="joint_1_y" value="${sec_kinematics['joint_1']['y']}" scope="parent" />
+    <xacro:property name="joint_1_z" value="${sec_kinematics['joint_1']['z']}" scope="parent" />
+    <xacro:property name="joint_1_roll" value="${sec_kinematics['joint_1']['roll']}" scope="parent" />
+    <xacro:property name="joint_1_pitch" value="${sec_kinematics['joint_1']['pitch']}"
+      scope="parent" />
+    <xacro:property name="joint_1_yaw" value="${sec_kinematics['joint_1']['yaw']}" scope="parent" />
+
+    <xacro:property name="joint_2_x" value="${sec_kinematics['joint_2']['x']}" scope="parent" />
+    <xacro:property name="joint_2_y" value="${sec_kinematics['joint_2']['y']}" scope="parent" />
+    <xacro:property name="joint_2_z" value="${sec_kinematics['joint_2']['z']}" scope="parent" />
+    <xacro:property name="joint_2_roll" value="${sec_kinematics['joint_2']['roll']}" scope="parent" />
+    <xacro:property name="joint_2_pitch" value="${sec_kinematics['joint_2']['pitch']}"
+      scope="parent" />
+    <xacro:property name="joint_2_yaw" value="${sec_kinematics['joint_2']['yaw']}" scope="parent" />
+
+    <xacro:property name="joint_3_x" value="${sec_kinematics['joint_3']['x']}" scope="parent" />
+    <xacro:property name="joint_3_y" value="${sec_kinematics['joint_3']['y']}" scope="parent" />
+    <xacro:property name="joint_3_z" value="${sec_kinematics['joint_3']['z']}" scope="parent" />
+    <xacro:property name="joint_3_roll" value="${sec_kinematics['joint_3']['roll']}" scope="parent" />
+    <xacro:property name="joint_3_pitch" value="${sec_kinematics['joint_3']['pitch']}"
+      scope="parent" />
+    <xacro:property name="joint_3_yaw" value="${sec_kinematics['joint_3']['yaw']}" scope="parent" />
+
+    <xacro:property name="joint_4_x" value="${sec_kinematics['joint_4']['x']}" scope="parent" />
+    <xacro:property name="joint_4_y" value="${sec_kinematics['joint_4']['y']}" scope="parent" />
+    <xacro:property name="joint_4_z" value="${sec_kinematics['joint_4']['z']}" scope="parent" />
+    <xacro:property name="joint_4_roll" value="${sec_kinematics['joint_4']['roll']}" scope="parent" />
+    <xacro:property name="joint_4_pitch" value="${sec_kinematics['joint_4']['pitch']}"
+      scope="parent" />
+    <xacro:property name="joint_4_yaw" value="${sec_kinematics['joint_4']['yaw']}" scope="parent" />
+
+    <xacro:property name="joint_5_x" value="${sec_kinematics['joint_5']['x']}" scope="parent" />
+    <xacro:property name="joint_5_y" value="${sec_kinematics['joint_5']['y']}" scope="parent" />
+    <xacro:property name="joint_5_z" value="${sec_kinematics['joint_5']['z']}" scope="parent" />
+    <xacro:property name="joint_5_roll" value="${sec_kinematics['joint_5']['roll']}" scope="parent" />
+    <xacro:property name="joint_5_pitch" value="${sec_kinematics['joint_5']['pitch']}"
+      scope="parent" />
+    <xacro:property name="joint_5_yaw" value="${sec_kinematics['joint_5']['yaw']}" scope="parent" />
+
+    <xacro:property name="joint_6_x" value="${sec_kinematics['joint_6']['x']}" scope="parent" />
+    <xacro:property name="joint_6_y" value="${sec_kinematics['joint_6']['y']}" scope="parent" />
+    <xacro:property name="joint_6_z" value="${sec_kinematics['joint_6']['z']}" scope="parent" />
+    <xacro:property name="joint_6_roll" value="${sec_kinematics['joint_6']['roll']}" scope="parent" />
+    <xacro:property name="joint_6_pitch" value="${sec_kinematics['joint_6']['pitch']}"
+      scope="parent" />
+    <xacro:property name="joint_6_yaw" value="${sec_kinematics['joint_6']['yaw']}" scope="parent" />
+
+  </xacro:macro>
+
+  <xacro:macro name="read_hand_model_data"
+    params="joint_limits_parameters_file kinematics_parameters_file visual_parameters_file">
+    <!-- Read .yaml files from disk, load content into properties -->
+    <xacro:property name="config_joint_limit_parameters"
+      value="${xacro.load_yaml(joint_limits_parameters_file)}" />
+    <xacro:property name="config_kinematics_parameters"
+      value="${xacro.load_yaml(kinematics_parameters_file)}" />
+    <xacro:property name="config_visual_parameters"
+      value="${xacro.load_yaml(visual_parameters_file)}" />
+
+    <!-- Extract subsections from yaml dictionaries -->
+    <xacro:property name="sec_limits" value="${config_joint_limit_parameters['joint_limits']}" />
+    <xacro:property name="sec_kinematics" value="${config_kinematics_parameters['kinematics']}" />
+    <xacro:property name="sec_mesh_files" value="${config_visual_parameters['mesh_files']}"
+      scope="parent" />
+
+    <!-- JOINTS LIMIT PARAMETERS -->
+    <xacro:property name="finger_right_lower_limit"
+      value="${sec_limits['finger_right']['min_position']}" scope="parent" />
+    <xacro:property name="finger_right_upper_limit"
+      value="${sec_limits['finger_right']['max_position']}" scope="parent" />
+    <xacro:property name="finger_right_velocity_limit"
+      value="${sec_limits['finger_right']['max_velocity']}" scope="parent" />
+    <xacro:property name="finger_right_effort_limit"
+      value="${sec_limits['finger_right']['max_effort']}" scope="parent" />
+    <xacro:property name="finger_left_lower_limit"
+      value="${sec_limits['finger_left']['min_position']}" scope="parent" />
+    <xacro:property name="finger_left_upper_limit"
+      value="${sec_limits['finger_left']['max_position']}" scope="parent" />
+    <xacro:property name="finger_left_velocity_limit"
+      value="${sec_limits['finger_left']['max_velocity']}" scope="parent" />
+    <xacro:property name="finger_left_effort_limit"
+      value="${sec_limits['finger_left']['max_effort']}" scope="parent" />
+
+    <!-- kinematics -->
+    <xacro:property name="hand_x" value="${sec_kinematics['hand']['x']}" scope="parent" />
+    <xacro:property name="hand_y" value="${sec_kinematics['hand']['y']}" scope="parent" />
+    <xacro:property name="hand_z" value="${sec_kinematics['hand']['z']}" scope="parent" />
+    <xacro:property name="hand_roll" value="${sec_kinematics['hand']['roll']}" scope="parent" />
+    <xacro:property name="hand_pitch" value="${sec_kinematics['hand']['pitch']}" scope="parent" />
+    <xacro:property name="hand_yaw" value="${sec_kinematics['hand']['yaw']}" scope="parent" />
+
+    <xacro:property name="finger_right_x" value="${sec_kinematics['finger_right']['x']}"
+      scope="parent" />
+    <xacro:property name="finger_right_y" value="${sec_kinematics['finger_right']['y']}"
+      scope="parent" />
+    <xacro:property name="finger_right_z" value="${sec_kinematics['finger_right']['z']}"
+      scope="parent" />
+    <xacro:property name="finger_right_roll" value="${sec_kinematics['finger_right']['roll']}"
+      scope="parent" />
+    <xacro:property name="finger_right_pitch" value="${sec_kinematics['finger_right']['pitch']}"
+      scope="parent" />
+    <xacro:property name="finger_right_yaw" value="${sec_kinematics['finger_right']['yaw']}"
+      scope="parent" />
+
+    <xacro:property name="finger_left_x" value="${sec_kinematics['finger_left']['x']}"
+      scope="parent" />
+    <xacro:property name="finger_left_y" value="${sec_kinematics['finger_left']['y']}"
+      scope="parent" />
+    <xacro:property name="finger_left_z" value="${sec_kinematics['finger_left']['z']}"
+      scope="parent" />
+    <xacro:property name="finger_left_roll" value="${sec_kinematics['finger_left']['roll']}"
+      scope="parent" />
+    <xacro:property name="finger_left_pitch" value="${sec_kinematics['finger_left']['pitch']}"
+      scope="parent" />
+    <xacro:property name="finger_left_yaw" value="${sec_kinematics['finger_left']['yaw']}"
+      scope="parent" />
+
+  </xacro:macro>
+
+</robot>
