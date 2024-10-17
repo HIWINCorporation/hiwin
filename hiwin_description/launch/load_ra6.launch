@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="name" default="hiwin" />
+    <arg name="ra_type" default="" />
+
+    <param name="robot_description"
+        command="$(find xacro)/xacro '$(find hiwin_description)/urdf/ra.urdf.xacro' name:=$(arg name) ra_type:=$(arg ra_type)" />
+
+</launch>

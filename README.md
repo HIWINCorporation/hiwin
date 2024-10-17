@@ -27,7 +27,7 @@ $ rosdep update
 $ rosdep install --from-paths src/ --ignore-src --rosdistro noetic
 
 # build the workspace (using catkin_tools)
-$ catkin build
+$ catkin_make
 
 # activate this workspace
 $ source $HOME/catkin_ws/devel/setup.bash
