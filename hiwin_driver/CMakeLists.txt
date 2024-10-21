@@ -7,6 +7,7 @@ find_package(catkin REQUIRED
     actionlib
     controller_manager
     hardware_interface
+    industrial_robot_status_interface
     pluginlib
     roscpp
 )

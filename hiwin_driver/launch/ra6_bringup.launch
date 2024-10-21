@@ -8,7 +8,7 @@
     <arg name="controller_config_file" default="$(find hiwin_driver)/config/ra6_controllers.yaml"
         doc="Config file used for defining the ROS-Control controllers." />
     <arg name="controllers"
-        default="joint_state_controller"
+        default="joint_state_controller robot_status_controller pos_joint_traj_controller"
         doc="Controllers that are activated by default." />
 
     <include file="$(find hiwin_driver)/launch/ra6_common.launch" pass_all_args="true" />

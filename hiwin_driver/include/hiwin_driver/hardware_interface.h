@@ -5,6 +5,10 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 
+#include <control_msgs/FollowJointTrajectoryFeedback.h>
+
+#include <industrial_robot_status_interface/industrial_robot_status_interface.h>
+
 namespace hiwin_driver
 {
 
@@ -48,6 +52,14 @@ public:
    */
   virtual void write(const ros::Time& time, const ros::Duration& period) override;
   /*!
+   * \brief Starts and stops controllers.
+   *
+   * \param start_list List of controllers to start
+   * \param stop_list List of controllers to stop
+   */
+  virtual void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
+                        const std::list<hardware_interface::ControllerInfo>& stop_list) override;
+  /*!
    * \brief Checks if a reset of the ROS controllers is necessary.
    *
    * \returns Necessity of ROS controller reset
@@ -63,8 +75,12 @@ protected:
   std::vector<double> joint_positions_;
   std::vector<double> joint_velocities_;
   std::vector<double> joint_efforts_;
+  std::vector<double> joint_position_command_;
 
   std::atomic<bool> controller_reset_necessary_;
+
+  industrial_robot_status_interface::RobotStatus robot_status_resource_{};
+  industrial_robot_status_interface::IndustrialRobotStatusInterface robot_status_interface_{};
 };
 
 }  // namespace hiwin_driver

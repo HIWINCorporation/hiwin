@@ -14,12 +14,15 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>industrial_robot_status_interface</build_depend>
+
   <depend>actionlib</depend>
   <depend>controller_manager</depend>
   <depend>hardware_interface</depend>
   <depend>pluginlib</depend>
   <depend>roscpp</depend>
 
+  <exec_depend>industrial_robot_status_controller</exec_depend>
   <exec_depend>joint_state_controller</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
 

@@ -16,3 +16,15 @@ hiwin_hardware_interface:
 joint_state_controller:
    type:         joint_state_controller/JointStateController
    publish_rate: *loop_hz
+
+# Joint Trajectory Controller - position based -------------------------------
+# For detailed explanations of parameter see http://wiki.ros.org/joint_trajectory_controller
+pos_joint_traj_controller:
+   type: position_controllers/JointTrajectoryController
+   joints: *robot_joints
+   state_publish_rate: *loop_hz
+
+robot_status_controller:
+   type: industrial_robot_status_controller/IndustrialRobotStatusController
+   handle_name: industrial_robot_status_handle
+   publish_rate: 10
