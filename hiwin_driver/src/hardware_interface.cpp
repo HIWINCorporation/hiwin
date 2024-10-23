@@ -9,10 +9,12 @@ namespace hiwin_driver
 {
 HardwareInterface::HardwareInterface()
   : joint_names_(6)
-  , joint_positions_{ { 0, 0, 0, 0, 0, 0 } }
-  , joint_velocities_{ { 0, 0, 0, 0, 0, 0 } }
-  , joint_efforts_{ { 0, 0, 0, 0, 0, 0 } }
+  , joint_positions_({ 0, 0, 0, 0, 0, 0 })
+  , joint_velocities_({ 0, 0, 0, 0, 0, 0 })
+  , joint_efforts_({ 0, 0, 0, 0, 0, 0 })
   , joint_position_command_({ 0, 0, 0, 0, 0, 0 })
+  , target_joint_positions_({ 0, 0, 0, 0, 0, 0 })
+  , target_joint_velocities_({ 0, 0, 0, 0, 0, 0 })
 {
 }
 
@@ -45,10 +47,15 @@ bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
   robot_status_interface_.registerHandle(industrial_robot_status_interface::IndustrialRobotStatusHandle(
       "industrial_robot_status_handle", robot_status_resource_));
 
+  jnt_traj_interface_.registerGoalCallback(
+      std::bind(&HardwareInterface::startJointInterpolation, this, std::placeholders::_1));
+  jnt_traj_interface_.registerCancelCallback(std::bind(&HardwareInterface::cancelInterpolation, this));
+
   // Register interfaces
   registerInterface(&js_interface_);
   registerInterface(&robot_status_interface_);
   registerInterface(&pj_interface_);
+  registerInterface(&jnt_traj_interface_);
 
   return true;
 }
@@ -64,11 +71,24 @@ void HardwareInterface::read(const ros::Time& time, const ros::Duration& period)
   robot_status_resource_.in_error = TriState::UNKNOWN;
   robot_status_resource_.error_code = 0;
 
+  // robot connect mock
+  for (size_t i = 0; i < 6; i++)
+  {
+    joint_positions_[i] = target_joint_positions_[i];
+    joint_velocities_[i] = target_joint_velocities_[i];
+  }
+
   control_msgs::FollowJointTrajectoryFeedback feedback = control_msgs::FollowJointTrajectoryFeedback();
   for (size_t i = 0; i < 6; i++)
   {
+    feedback.desired.positions.push_back(target_joint_positions_[i]);
+    feedback.desired.velocities.push_back(target_joint_velocities_[i]);
+    feedback.actual.positions.push_back(joint_positions_[i]);
+    feedback.actual.velocities.push_back(joint_velocities_[i]);
+    feedback.error.positions.push_back(std::abs(joint_positions_[i] - target_joint_positions_[i]));
+    feedback.error.velocities.push_back(std::abs(joint_velocities_[i] - target_joint_velocities_[i]));
   }
-  // jnt_traj_interface_.setFeedback(feedback);
+  jnt_traj_interface_.setFeedback(feedback);
 }
 
 void HardwareInterface::write(const ros::Time& time, const ros::Duration& period)
@@ -106,6 +126,39 @@ bool HardwareInterface::shouldResetControllers()
   }
 }
 
+void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointTrajectoryGoal& trajectory)
+{
+  size_t point_number = trajectory.trajectory.points.size();
+  ROS_DEBUG("Starting joint-based trajectory forward");
+
+  for (size_t i = 0; i < point_number; i++)
+  {
+    target_joint_positions_[0] = trajectory.trajectory.points[i].positions[0];
+    target_joint_positions_[1] = trajectory.trajectory.points[i].positions[1];
+    target_joint_positions_[2] = trajectory.trajectory.points[i].positions[2];
+    target_joint_positions_[3] = trajectory.trajectory.points[i].positions[3];
+    target_joint_positions_[4] = trajectory.trajectory.points[i].positions[4];
+    target_joint_positions_[5] = trajectory.trajectory.points[i].positions[5];
+
+    target_joint_velocities_[0] = trajectory.trajectory.points[i].velocities[0];
+    target_joint_velocities_[1] = trajectory.trajectory.points[i].velocities[1];
+    target_joint_velocities_[2] = trajectory.trajectory.points[i].velocities[2];
+    target_joint_velocities_[3] = trajectory.trajectory.points[i].velocities[3];
+    target_joint_velocities_[4] = trajectory.trajectory.points[i].velocities[4];
+    target_joint_velocities_[5] = trajectory.trajectory.points[i].velocities[5];
+  }
+
+  // robot connect mock
+  hardware_interface::ExecutionState final_state;
+  final_state = hardware_interface::ExecutionState::SUCCESS;
+  jnt_traj_interface_.setDone(final_state);
+}
+
+void HardwareInterface::cancelInterpolation()
+{
+  ROS_DEBUG("Cancelling Trajectory");
+}
+
 }  // namespace hiwin_driver
 
-PLUGINLIB_EXPORT_CLASS(hiwin_driver::HardwareInterface, hardware_interface::RobotHW)
+PLUGINLIB_EXPORT_CLASS(hiwin_driver::HardwareInterface, hardware_interface::RobotHW);

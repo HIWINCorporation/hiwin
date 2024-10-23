@@ -1,11 +1,14 @@
-#ifndef HIWIN_DRIVER_HARDWARE_INTERFACE_H_INCLUDED
-#define HIWIN_DRIVER_HARDWARE_INTERFACE_H_INCLUDED
+#ifndef HIWIN_DRIVER_HARDWARE_INTERFACE_H_
+#define HIWIN_DRIVER_HARDWARE_INTERFACE_H_
 
 #include <hardware_interface/robot_hw.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 
+#include <control_msgs/FollowJointTrajectoryAction.h>
 #include <control_msgs/FollowJointTrajectoryFeedback.h>
+
+#include <forwarding_controllers/trajectory_interface.h>
 
 #include <industrial_robot_status_interface/industrial_robot_status_interface.h>
 
@@ -67,15 +70,22 @@ public:
   bool shouldResetControllers();
 
 protected:
+  void startJointInterpolation(const control_msgs::FollowJointTrajectoryGoal& trajectory);
+  void cancelInterpolation();
+
   hardware_interface::JointStateInterface js_interface_;
   hardware_interface::PositionJointInterface pj_interface_;
   hardware_interface::VelocityJointInterface vj_interface_;
+  hardware_interface::JointTrajectoryInterface jnt_traj_interface_;
 
   std::vector<std::string> joint_names_;
   std::vector<double> joint_positions_;
   std::vector<double> joint_velocities_;
   std::vector<double> joint_efforts_;
   std::vector<double> joint_position_command_;
+
+  std::vector<double> target_joint_positions_;
+  std::vector<double> target_joint_velocities_;
 
   std::atomic<bool> controller_reset_necessary_;
 
@@ -85,4 +95,4 @@ protected:
 
 }  // namespace hiwin_driver
 
-#endif  // HIWIN_DRIVER_HARDWARE_INTERFACE_H_INCLUDED
+#endif  // HIWIN_DRIVER_HARDWARE_INTERFACE_H_

@@ -1,7 +1,8 @@
 <library path="lib/libhiwin_driver_plugin">
-    <class name="hiwin_driver/HardwareInterface" type="hiwin_driver::HardwareInterface" base_class_type="hardware_interface::RobotHW">
-      <description>
-        HIWIN Robots ROS Driver as plugin
-      </description>
-    </class>
-  </library>
+  <class name="hiwin_driver/HardwareInterface" type="hiwin_driver::HardwareInterface"
+    base_class_type="hardware_interface::RobotHW">
+    <description>
+      HIWIN Robots ROS Driver as plugin
+    </description>
+  </class>
+</library>

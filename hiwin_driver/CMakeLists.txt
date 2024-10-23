@@ -6,6 +6,7 @@ find_package(catkin REQUIRED
   COMPONENTS
     actionlib
     controller_manager
+    forwarding_controllers
     hardware_interface
     industrial_robot_status_interface
     pluginlib
@@ -19,6 +20,7 @@ catkin_package(
   CATKIN_DEPENDS
     actionlib
     controller_manager
+    forwarding_controllers
     hardware_interface
     pluginlib
     roscpp

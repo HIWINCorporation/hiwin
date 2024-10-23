@@ -17,6 +17,10 @@ joint_state_controller:
    type:         joint_state_controller/JointStateController
    publish_rate: *loop_hz
 
+forward_joint_traj_controller:
+    type: "forwarding_controllers/JointTrajectoryController"
+    joints: *robot_joints
+
 # Joint Trajectory Controller - position based -------------------------------
 # For detailed explanations of parameter see http://wiki.ros.org/joint_trajectory_controller
 pos_joint_traj_controller:

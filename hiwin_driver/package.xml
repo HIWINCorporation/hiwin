@@ -18,6 +18,7 @@
 
   <depend>actionlib</depend>
   <depend>controller_manager</depend>
+  <depend>forwarding_controllers</depend>
   <depend>hardware_interface</depend>
   <depend>pluginlib</depend>
   <depend>roscpp</depend>

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>forwarding_controllers</name>
+  <version>0.0.0</version>
+  <description>The forwarding_controllers package</description>
+
+  <author>HIWIN Technologies Corp</author>
+  <maintainer email="hiwin_robot@hiwin.tw">HIWIN Technologies Corp</maintainer>
+
+  <license>BSD</license>
+
+  <url type="repository">https://github.com/HIWINCorporation/hiwin_ros.git</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>actionlib</depend>
+  <depend>controller_interface</depend>
+  <depend>hardware_interface</depend>
+  <depend>industrial_msgs</depend>
+  <depend>pluginlib</depend>
+  <depend>roscpp</depend>
+
+  <build_depend>control_msgs</build_depend>
+  <build_export_depend>control_msgs</build_export_depend>
+
+  <export>
+    <controller_interface plugin="${prefix}/forwarding_controllers_plugin.xml"/>
+  </export>
+</package>
