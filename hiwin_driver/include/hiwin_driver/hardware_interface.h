@@ -12,6 +12,8 @@
 
 #include <industrial_robot_status_interface/industrial_robot_status_interface.h>
 
+#include <hiwin_robot_client_library/hiwin_driver.h>
+
 namespace hiwin_driver
 {
 
@@ -91,6 +93,9 @@ protected:
 
   industrial_robot_status_interface::RobotStatus robot_status_resource_{};
   industrial_robot_status_interface::IndustrialRobotStatusInterface robot_status_interface_{};
+
+  std::string robot_ip_;
+  std::unique_ptr<hrsdk::HIWINDriver> hiwin_driver_;
 };
 
 }  // namespace hiwin_driver

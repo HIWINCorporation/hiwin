@@ -20,6 +20,12 @@ HardwareInterface::HardwareInterface()
 
 bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
 {
+  if (!robot_hw_nh.getParam("robot_ip", robot_ip_))
+  {
+    ROS_ERROR_STREAM("Required parameter " << robot_hw_nh.resolveName("robot_ip") << " not given.");
+    return false;
+  }
+
   // Names of the joints. Usually, this is given in the controller config file.
   if (!robot_hw_nh.getParam("joints", joint_names_))
   {
@@ -28,6 +34,15 @@ bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
     throw std::runtime_error(
         "Cannot find required parameter "
         "'controller_joint_names' on the parameter server.");
+  }
+
+  try
+  {
+    hiwin_driver_.reset(new hrsdk::HIWINDriver(robot_ip_));
+  }
+  catch (const char* msg)
+  {
+    ROS_FATAL_STREAM("...");
   }
 
   // Create ros_control interfaces
@@ -57,6 +72,10 @@ bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
   registerInterface(&pj_interface_);
   registerInterface(&jnt_traj_interface_);
 
+  hiwin_driver_->connect();
+  hrsdk::RobotMode robot_mode;
+  hiwin_driver_->getRobotMode(robot_mode);
+
   return true;
 }
 
@@ -72,9 +91,9 @@ void HardwareInterface::read(const ros::Time& time, const ros::Duration& period)
   robot_status_resource_.error_code = 0;
 
   // robot connect mock
+  hiwin_driver_->getJointPosition(joint_positions_);
   for (size_t i = 0; i < 6; i++)
   {
-    joint_positions_[i] = target_joint_positions_[i];
     joint_velocities_[i] = target_joint_velocities_[i];
   }
 
@@ -131,21 +150,21 @@ void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointT
   size_t point_number = trajectory.trajectory.points.size();
   ROS_DEBUG("Starting joint-based trajectory forward");
 
+  double last_time = 0.0;
   for (size_t i = 0; i < point_number; i++)
   {
-    target_joint_positions_[0] = trajectory.trajectory.points[i].positions[0];
-    target_joint_positions_[1] = trajectory.trajectory.points[i].positions[1];
-    target_joint_positions_[2] = trajectory.trajectory.points[i].positions[2];
-    target_joint_positions_[3] = trajectory.trajectory.points[i].positions[3];
-    target_joint_positions_[4] = trajectory.trajectory.points[i].positions[4];
-    target_joint_positions_[5] = trajectory.trajectory.points[i].positions[5];
+    trajectory_msgs::JointTrajectoryPoint point = trajectory.trajectory.points[i];
 
-    target_joint_velocities_[0] = trajectory.trajectory.points[i].velocities[0];
-    target_joint_velocities_[1] = trajectory.trajectory.points[i].velocities[1];
-    target_joint_velocities_[2] = trajectory.trajectory.points[i].velocities[2];
-    target_joint_velocities_[3] = trajectory.trajectory.points[i].velocities[3];
-    target_joint_velocities_[4] = trajectory.trajectory.points[i].velocities[4];
-    target_joint_velocities_[5] = trajectory.trajectory.points[i].velocities[5];
+    target_joint_positions_[0] = point.positions[0];
+    target_joint_positions_[1] = point.positions[1];
+    target_joint_positions_[2] = point.positions[2];
+    target_joint_positions_[3] = point.positions[3];
+    target_joint_positions_[4] = point.positions[4];
+    target_joint_positions_[5] = point.positions[5];
+
+    double next_time = point.time_from_start.toSec();
+    hiwin_driver_->writeJointTrajectory(target_joint_positions_, next_time - last_time);
+    last_time = next_time;
   }
 
   // robot connect mock

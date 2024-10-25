@@ -17,10 +17,12 @@
     </include>
 
     <!-- Convert joint states to /tf tranforms -->
-    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /> -->
+    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    /> -->
 
     <include file="$(find hiwin_driver)/launch/hiwin_control.launch">
         <arg name="controller_config_file" value="$(arg controller_config_file)" />
         <arg name="controllers" value="$(arg controllers)" />
+        <arg name="robot_ip" value="$(arg robot_ip)" />
     </include>
 </launch>

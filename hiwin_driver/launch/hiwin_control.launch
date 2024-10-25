@@ -14,6 +14,7 @@
     <!-- Load hardware interface -->
     <node name="hiwin_hardware_interface" pkg="hiwin_driver" type="hiwin_driver_node"
         output="screen">
+        <param name="robot_ip" type="str" value="$(arg robot_ip)" />
     </node>
 
     <!-- Load controller settings -->

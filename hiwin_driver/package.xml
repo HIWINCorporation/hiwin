@@ -20,6 +20,7 @@
   <depend>controller_manager</depend>
   <depend>forwarding_controllers</depend>
   <depend>hardware_interface</depend>
+  <depend>hiwin_robot_client_library</depend>
   <depend>pluginlib</depend>
   <depend>roscpp</depend>
 

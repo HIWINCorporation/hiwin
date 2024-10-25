@@ -1,0 +1,135 @@
+#include <iostream>
+#include <cstring>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <bits/stdc++.h>
+
+#include <ros/ros.h>
+
+#include <hiwin_robot_client_library/hiwin_driver.h>
+#include <hiwin_robot_client_library/hiwin_driver.h>
+
+namespace hrsdk
+{
+HIWINDriver::HIWINDriver(const std::string& robot_ip) : robot_ip_(robot_ip)
+{
+}
+
+HIWINDriver::~HIWINDriver()
+{
+  disconnect();  // Ensure disconnection on destruction
+}
+
+bool HIWINDriver::connect()
+{
+  commander_.reset(new hrsdk::Commander(robot_ip_));
+  commander_->connect();
+
+  handle_client_.setup(robot_ip_, 1504, std::chrono::seconds(10));
+  file_client_.setup(robot_ip_, 1505, std::chrono::seconds(10));
+
+  commander_->getPermissions();
+  commander_->setRobotMode(RobotMode::Manual);
+  commander_->getActualPosition(prev_target_joint_positions_);
+  commander_->enableRobot();
+
+  return true;
+}
+
+void HIWINDriver::disconnect()
+{
+}
+
+void HIWINDriver::setRobotMode(RobotMode mode)
+{
+  commander_->setRobotMode(mode);
+}
+
+void HIWINDriver::getRobotMode(RobotMode& mode)
+{
+  commander_->getRobotMode(mode);
+}
+
+void HIWINDriver::getJointVelocity(std::vector<double>& velocities)
+{
+  double value[6];
+  if (velocities.size() < 6)
+  {
+    return;
+  }
+
+  if (commander_->getActualRPM(value) != 0)
+  {
+    return;
+  }
+
+  velocities.assign(value, value + 6);
+  return;
+}
+
+void HIWINDriver::getJointEffort(std::vector<double>& efforts)
+{
+  double value[6];
+  if (efforts.size() < 6)
+  {
+    return;
+  }
+
+  if (commander_->getActualCurrent(value) != 0)
+  {
+    return;
+  }
+
+  efforts.assign(value, value + 6);
+  return;
+}
+
+void HIWINDriver::getJointPosition(std::vector<double>& positions)
+{
+  double value[6];
+  if (positions.size() < 6)
+  {
+    return;
+  }
+
+  if (commander_->getActualPosition(value) != 0)
+  {
+    return;
+  }
+
+  positions.assign(value, value + 6);
+  return;
+}
+
+void HIWINDriver::writeJointTrajectory(const std::vector<double>& positions, const float goal_time)
+{
+  double distance[6];
+  double value[6];
+  if (positions.size() != 6)
+  {
+    return;
+  }
+
+  for (size_t i = 0; i < 6; i++)
+  {
+    distance[i] = positions[i] - prev_target_joint_positions_[i];
+    (distance[i] < 0) ? distance[i] *= -1 : distance[i] *= 1;
+    prev_target_joint_positions_[i] = positions[i];
+  }
+
+  double max_distance = *std::max_element(distance, distance + 6);
+  double velocity = max_distance / goal_time;
+
+  /*
+   * ... TBD.
+   */
+
+  std::copy(positions.begin(), positions.end(), value);
+  if (commander_->ptpJoint(value, 100) != 0)
+  {
+    return;
+  }
+}
+
+}  // namespace hrsdk

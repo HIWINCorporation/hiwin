@@ -8,6 +8,7 @@ find_package(catkin REQUIRED
     controller_manager
     forwarding_controllers
     hardware_interface
+    hiwin_robot_client_library
     industrial_robot_status_interface
     pluginlib
     roscpp
@@ -16,7 +17,8 @@ find_package(catkin REQUIRED
 catkin_package(
   INCLUDE_DIRS 
     include
-#  LIBRARIES hiwin_driver
+  LIBRARIES 
+    hiwin_driver_plugin
   CATKIN_DEPENDS
     actionlib
     controller_manager
@@ -35,14 +37,14 @@ include_directories(
 add_library(hiwin_driver_plugin
   src/hardware_interface.cpp
 )
-target_link_libraries(hiwin_driver_plugin ${catkin_LIBRARIES})
+target_link_libraries(hiwin_driver_plugin ${catkin_LIBRARIES} hiwin_robot_client_library)
 add_dependencies(hiwin_driver_plugin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(hiwin_driver_node
   src/hardware_interface.cpp
   src/hardware_interface_node.cpp
 )
-target_link_libraries(hiwin_driver_node ${catkin_LIBRARIES})
+target_link_libraries(hiwin_driver_node ${catkin_LIBRARIES} hiwin_robot_client_library)
 add_dependencies(hiwin_driver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS hiwin_driver_plugin hiwin_driver_node
