@@ -147,10 +147,11 @@ bool HardwareInterface::shouldResetControllers()
 
 void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointTrajectoryGoal& trajectory)
 {
-  size_t point_number = trajectory.trajectory.points.size();
   ROS_DEBUG("Starting joint-based trajectory forward");
 
+  size_t point_number = trajectory.trajectory.points.size();
   double last_time = 0.0;
+
   for (size_t i = 0; i < point_number; i++)
   {
     trajectory_msgs::JointTrajectoryPoint point = trajectory.trajectory.points[i];
@@ -163,7 +164,7 @@ void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointT
     target_joint_positions_[5] = point.positions[5];
 
     double next_time = point.time_from_start.toSec();
-    hiwin_driver_->writeJointTrajectory(target_joint_positions_, next_time - last_time);
+    hiwin_driver_->writeJointCommand(target_joint_positions_, next_time - last_time);
     last_time = next_time;
   }
 

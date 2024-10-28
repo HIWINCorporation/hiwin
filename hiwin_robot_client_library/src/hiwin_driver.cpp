@@ -24,15 +24,32 @@ HIWINDriver::~HIWINDriver()
 bool HIWINDriver::connect()
 {
   commander_.reset(new hrsdk::Commander(robot_ip_));
-  commander_->connect();
+  if (!commander_->connect())
+  {
+    return false;
+  }
 
   handle_client_.setup(robot_ip_, 1504, std::chrono::seconds(10));
   file_client_.setup(robot_ip_, 1505, std::chrono::seconds(10));
 
+  commander_->GetRobotVersion(robot_version_);
+  std::cout << robot_version_.c_str() << std::endl;
+
   commander_->getPermissions();
-  commander_->setRobotMode(RobotMode::Manual);
+  commander_->setLogLevel(LogLevels::SetCommand);
+
+  commander_->setRobotMode(RobotMode::Auto);
+  commander_->setPtpSpeed(100);
+  commander_->setOverrideRatio(100);
+
   commander_->getActualPosition(prev_target_joint_positions_);
   commander_->enableRobot();
+
+  commander_->getErrorCode(error_code_);
+  for (auto code : error_code)
+  {
+    std::cout << code << std::endl;
+  }
 
   return true;
 }
@@ -102,7 +119,7 @@ void HIWINDriver::getJointPosition(std::vector<double>& positions)
   return;
 }
 
-void HIWINDriver::writeJointTrajectory(const std::vector<double>& positions, const float goal_time)
+void HIWINDriver::writeJointCommand(const std::vector<double>& positions, const float goal_time)
 {
   double distance[6];
   double value[6];
@@ -127,6 +144,33 @@ void HIWINDriver::writeJointTrajectory(const std::vector<double>& positions, con
 
   std::copy(positions.begin(), positions.end(), value);
   if (commander_->ptpJoint(value, 100) != 0)
+  {
+    return;
+  }
+}
+
+void HIWINDriver::writeJointTrajectory(const std::vector<std::vector<double> >& positions, const float goal_time)
+{
+  std::vector<double> point;
+  double points[100][6];
+  if (positions.size() == 0 || positions.size() > 100)
+  {
+    return;
+  }
+
+  for (size_t i = 0; i < positions.size(); i++)
+  {
+    if (positions[i].size() != 6)
+    {
+      return;
+    }
+    for (size_t j = 0; j < positions[i].size(); j++)
+    {
+      std::copy(positions[i].begin(), positions[i].end(), points[i]);
+    }
+  }
+
+  if (commander_->ptpJointScript(positions.size(), points, 100) != 0)
   {
     return;
   }

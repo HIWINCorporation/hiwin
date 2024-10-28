@@ -13,6 +13,8 @@ class HIWINDriver
 {
 private:
   std::string robot_ip_;  // IP address of the robot
+  std::string robot_version_;
+  std::vector<std::string> error_code_;
 
   std::unique_ptr<hrsdk::Commander> commander_;
 
@@ -32,7 +34,8 @@ public:
   void getJointEffort(std::vector<double>& efforts);
   void getJointPosition(std::vector<double>& positions);
 
-  void writeJointTrajectory(const std::vector<double>& positions, const float goal_time);
+  void writeJointCommand(const std::vector<double>& positions, const float goal_time);
+  void writeJointTrajectory(const std::vector<std::vector<double> >& positions, const float goal_time);
 
   void setRobotMode(RobotMode mode);
   void getRobotMode(RobotMode& mode);
