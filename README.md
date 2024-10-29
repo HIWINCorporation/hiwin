@@ -8,8 +8,6 @@
 # Contents
 Branch naming follows the ROS distribution they are compatible with. -devel branches may be unstable. Releases are made from the distribution branches (indigo, kinetic).
 
-# System Requirements
-
 # Installation
 ### Building from Source
 ```bash

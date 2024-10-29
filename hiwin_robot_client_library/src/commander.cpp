@@ -1,3 +1,22 @@
+/*
+ * -- BEGIN LICENSE BLOCK ----------------------------------------------
+ * Copyright 2024 HIWIN Technologies Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * -- END LICENSE BLOCK ------------------------------------------------
+ */
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -5,8 +24,6 @@
 #include <cmath>
 
 #include <hiwin_robot_client_library/commander.h>
-
-#define PARA_LEN 249
 
 namespace hrsdk
 {
@@ -374,38 +391,6 @@ int Commander::ptpJoint(double (&positions)[6], double ratio)
 
   TCPClient::read(data_r, sizeof(Responseformat), read_chars);
   return r.result;
-}
-
-int Commander::ptpJointScript(int points_count, double (&positions)[100][6], double ratio)
-{
-  size_t written;
-  Commandformat w = {};
-  const uint8_t* data_w = static_cast<const uint8_t*>(static_cast<void*>(&w));
-
-  // w.cmd_id = ;
-  w.param[0] = 1;  // smooth
-  w.param[1] = points_count;
-
-  double pos_deg;
-  int32_t deg_integer;
-  std::cout << "Points count: " << points_count << std::endl;
-  for (size_t i = 0; i < points_count; i++)
-  {
-    for (size_t j = 0; j < 6; j++)
-    {
-      pos_deg = positions[i][j] * (180 / M_PI) * 1000.0;
-      deg_integer = static_cast<int>(std::round(pos_deg));
-      std::cout << "[" << ((i * 12) + (j * 2) + 2) << "]: " << deg_integer << " ";
-      memcpy(&w.param[(i * 12) + (j * 2) + 2], &deg_integer, sizeof(int32_t));
-    }
-    std::cout << std::endl;
-  }
-
-  /*
-   * ...
-   */
-
-  return -1;
 }
 
 int Commander::motionAbort()

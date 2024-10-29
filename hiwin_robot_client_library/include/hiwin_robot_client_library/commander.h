@@ -1,3 +1,22 @@
+/*
+ * -- BEGIN LICENSE BLOCK ----------------------------------------------
+ * Copyright 2024 HIWIN Technologies Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * -- END LICENSE BLOCK ------------------------------------------------
+ */
+
 #ifndef HIWIN_ROBOT_CLIENT_LIBRARY_COMMANDER_H_
 #define HIWIN_ROBOT_CLIENT_LIBRARY_COMMANDER_H_
 
@@ -55,7 +74,6 @@ public:
   int getErrorCode(std::vector<std::string>& error_code);
 
   int ptpJoint(double (&positions)[6], double ratio);
-  int ptpJointScript(int points_count, double (&positions)[100][6], double ratio);
   int motionAbort();
   int setPtpSpeed(int ratio);
   int getPtpSpeed(int& ratio);

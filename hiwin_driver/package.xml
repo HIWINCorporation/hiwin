@@ -8,7 +8,7 @@
   <author>HIWIN Technologies Corp</author>
   <maintainer email="hiwin_robot@hiwin.tw">HIWIN Technologies Corp</maintainer>
 
-  <license>BSD</license>
+  <license>Apache-2.0</license>
 
   <url type="repository">https://github.com/HIWINCorporation/hiwin_ros.git</url>
 

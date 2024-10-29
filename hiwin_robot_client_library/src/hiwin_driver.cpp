@@ -1,3 +1,22 @@
+/*
+ * -- BEGIN LICENSE BLOCK ----------------------------------------------
+ * Copyright 2024 HIWIN Technologies Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * -- END LICENSE BLOCK ------------------------------------------------
+ */
+
 #include <iostream>
 #include <cstring>
 #include <sys/socket.h>
@@ -176,33 +195,6 @@ void HIWINDriver::writeJointCommand(const std::vector<double>& positions, const 
   std::copy(positions.begin(), positions.end(), value);
 
   commander_->ptpJoint(value, 100);
-}
-
-void HIWINDriver::writeJointTrajectory(const std::vector<std::vector<double> >& positions, const float goal_time)
-{
-  std::vector<double> point;
-  double points[100][6];
-  if (positions.size() == 0 || positions.size() > 100)
-  {
-    return;
-  }
-
-  for (size_t i = 0; i < positions.size(); i++)
-  {
-    if (positions[i].size() != 6)
-    {
-      return;
-    }
-    for (size_t j = 0; j < positions[i].size(); j++)
-    {
-      std::copy(positions[i].begin(), positions[i].end(), points[i]);
-    }
-  }
-
-  if (commander_->ptpJointScript(positions.size(), points, 100) != 0)
-  {
-    return;
-  }
 }
 
 void HIWINDriver::motionAbort()

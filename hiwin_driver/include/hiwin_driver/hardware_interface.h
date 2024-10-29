@@ -1,3 +1,22 @@
+/*
+ * -- BEGIN LICENSE BLOCK ----------------------------------------------
+ * Copyright 2024 HIWIN Technologies Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * -- END LICENSE BLOCK ------------------------------------------------
+ */
+
 #ifndef HIWIN_DRIVER_HARDWARE_INTERFACE_H_
 #define HIWIN_DRIVER_HARDWARE_INTERFACE_H_
 
@@ -41,7 +60,7 @@ public:
    */
   virtual bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
   /*!
-   * \brief Read method of the control loop. Reads a RTDE package from the robot and handles and
+   * \brief Read method of the control loop. Reads data from the robot and handles and
    * publishes the information as needed.
    *
    * \param time Current time
@@ -49,8 +68,7 @@ public:
    */
   virtual void read(const ros::Time& time, const ros::Duration& period) override;
   /*!
-   * \brief Write method of the control loop. Writes target joint positions to the robot to be read
-   * by its URCaps program.
+   * \brief Write method of the control loop. Writes target joint positions to the robot
    *
    * \param time Current time
    * \param period Duration of current control loop iteration
