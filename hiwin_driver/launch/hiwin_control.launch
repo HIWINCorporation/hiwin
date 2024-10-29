@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="ra_type" default="" doc="Type/series of used HIWIN robot." />
     <arg name="robot_ip" doc="IP address by which the robot can be reached." />
     <arg name="tf_prefix" default="" doc="tf_prefix used for the robot." />
     <arg name="robot_description_file" default="$(find hiwin_description)/launch/load_ra6.launch"

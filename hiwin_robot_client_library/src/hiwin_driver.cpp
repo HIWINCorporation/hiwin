@@ -38,18 +38,14 @@ bool HIWINDriver::connect()
   commander_->getPermissions();
   commander_->setLogLevel(LogLevels::SetCommand);
 
-  commander_->setRobotMode(RobotMode::Auto);
+  commander_->setRobotMode(ControlMode::Auto);
   commander_->setPtpSpeed(100);
   commander_->setOverrideRatio(100);
 
   commander_->getActualPosition(prev_target_joint_positions_);
-  commander_->enableRobot();
 
-  commander_->getErrorCode(error_code_);
-  for (auto code : error_code)
-  {
-    std::cout << code << std::endl;
-  }
+  servoAmpState_ = true;
+  commander_->setServoAmpState(servoAmpState_);
 
   return true;
 }
@@ -58,14 +54,49 @@ void HIWINDriver::disconnect()
 {
 }
 
-void HIWINDriver::setRobotMode(RobotMode mode)
-{
-  commander_->setRobotMode(mode);
-}
-
-void HIWINDriver::getRobotMode(RobotMode& mode)
+void HIWINDriver::getRobotMode(ControlMode& mode)
 {
   commander_->getRobotMode(mode);
+}
+
+bool HIWINDriver::isEstopped()
+{
+  return false;
+}
+
+bool HIWINDriver::isDrivesPowered()
+{
+  commander_->getServoAmpState(servoAmpState_);
+  return servoAmpState_;
+}
+
+bool HIWINDriver::isMotionPossible()
+{
+  if (!servoAmpState_ || error_list_.size() || !commander_->isRemoteMode())
+  {
+    return false;
+  }
+  return true;
+}
+
+bool HIWINDriver::isInMotion()
+{
+  commander_->getMotionState(robotStatus_);
+  if (robotStatus_ == MotionStatus::Moving)
+  {
+    return true;
+  }
+  return false;
+}
+
+bool HIWINDriver::isInError()
+{
+  commander_->getErrorCode(error_list_);
+  if (error_list_.empty())
+  {
+    return false;
+  }
+  return true;
 }
 
 void HIWINDriver::getJointVelocity(std::vector<double>& velocities)
@@ -143,10 +174,8 @@ void HIWINDriver::writeJointCommand(const std::vector<double>& positions, const 
    */
 
   std::copy(positions.begin(), positions.end(), value);
-  if (commander_->ptpJoint(value, 100) != 0)
-  {
-    return;
-  }
+
+  commander_->ptpJoint(value, 100);
 }
 
 void HIWINDriver::writeJointTrajectory(const std::vector<std::vector<double> >& positions, const float goal_time)
@@ -174,6 +203,11 @@ void HIWINDriver::writeJointTrajectory(const std::vector<std::vector<double> >& 
   {
     return;
   }
+}
+
+void HIWINDriver::motionAbort()
+{
+  commander_->motionAbort();
 }
 
 }  // namespace hrsdk

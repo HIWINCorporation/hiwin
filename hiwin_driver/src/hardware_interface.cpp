@@ -1,6 +1,12 @@
+#include <time.h>
+
 #include <pluginlib/class_list_macros.hpp>
 
 #include <hiwin_driver/hardware_interface.h>
+
+#define NSEC_PER_SEC (1000000000)
+#define DIFF_NS(A, B) (((B).tv_sec - (A).tv_sec) * NSEC_PER_SEC + (B).tv_nsec - (A).tv_nsec)
+#define MEASURE_TIMING
 
 using industrial_robot_status_interface::RobotMode;
 using industrial_robot_status_interface::TriState;
@@ -73,33 +79,42 @@ bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
   registerInterface(&jnt_traj_interface_);
 
   hiwin_driver_->connect();
-  hrsdk::RobotMode robot_mode;
-  hiwin_driver_->getRobotMode(robot_mode);
 
   return true;
 }
 
 void HardwareInterface::read(const ros::Time& time, const ros::Duration& period)
 {
-  // set defaults
-  robot_status_resource_.mode = RobotMode::UNKNOWN;
-  robot_status_resource_.e_stopped = TriState::UNKNOWN;
-  robot_status_resource_.drives_powered = TriState::UNKNOWN;
-  robot_status_resource_.motion_possible = TriState::UNKNOWN;
-  robot_status_resource_.in_motion = TriState::UNKNOWN;
-  robot_status_resource_.in_error = TriState::UNKNOWN;
-  robot_status_resource_.error_code = 0;
-
-  // robot connect mock
-  hiwin_driver_->getJointPosition(joint_positions_);
-  for (size_t i = 0; i < 6; i++)
+  hrsdk::ControlMode ctrl_mode;
+  hiwin_driver_->getRobotMode(ctrl_mode);
+  if (ctrl_mode == hrsdk::ControlMode::Manual)
   {
-    joint_velocities_[i] = target_joint_velocities_[i];
+    robot_status_resource_.mode = RobotMode::MANUAL;
   }
+  else if (ctrl_mode == hrsdk::ControlMode::Auto)
+  {
+    robot_status_resource_.mode = RobotMode::AUTO;
+  }
+  else
+  {
+    robot_status_resource_.mode = RobotMode::UNKNOWN;
+  }
+  robot_status_resource_.drives_powered = (hiwin_driver_->isDrivesPowered()) ? TriState::TRUE : TriState::FALSE;
+  robot_status_resource_.in_error = (hiwin_driver_->isInError()) ? TriState::TRUE : TriState::FALSE;
+  robot_status_resource_.motion_possible = (hiwin_driver_->isMotionPossible()) ? TriState::TRUE : TriState::FALSE;
+  robot_status_resource_.in_motion = (hiwin_driver_->isInMotion()) ? TriState::TRUE : TriState::FALSE;
+  robot_status_resource_.e_stopped = (hiwin_driver_->isEstopped()) ? TriState::TRUE : TriState::FALSE;
+  robot_status_resource_.error_code = 0;
+  hiwin_driver_->getJointPosition(joint_positions_);
+  hiwin_driver_->getJointVelocity(joint_velocities_);
 
   control_msgs::FollowJointTrajectoryFeedback feedback = control_msgs::FollowJointTrajectoryFeedback();
   for (size_t i = 0; i < 6; i++)
   {
+    // not provide command return
+    target_joint_positions_[i] = joint_positions_[i];
+    target_joint_velocities_[i] = joint_velocities_[i];
+
     feedback.desired.positions.push_back(target_joint_positions_[i]);
     feedback.desired.velocities.push_back(target_joint_velocities_[i]);
     feedback.actual.positions.push_back(joint_positions_[i]);
@@ -149,24 +164,54 @@ void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointT
 {
   ROS_DEBUG("Starting joint-based trajectory forward");
 
+#ifdef MEASURE_TIMING
+  struct timespec start_time;
+  struct timespec end_time;
+  uint32_t exec_ns = 0;
+  uint32_t exec_max_ns = 0;
+  uint32_t exec_min_ns = 0xFFFFFFFF;
+#endif
+
   size_t point_number = trajectory.trajectory.points.size();
   double last_time = 0.0;
 
   for (size_t i = 0; i < point_number; i++)
   {
     trajectory_msgs::JointTrajectoryPoint point = trajectory.trajectory.points[i];
-
-    target_joint_positions_[0] = point.positions[0];
-    target_joint_positions_[1] = point.positions[1];
-    target_joint_positions_[2] = point.positions[2];
-    target_joint_positions_[3] = point.positions[3];
-    target_joint_positions_[4] = point.positions[4];
-    target_joint_positions_[5] = point.positions[5];
+    std::vector<double> p;
+    p.push_back(point.positions[0]);
+    p.push_back(point.positions[1]);
+    p.push_back(point.positions[2]);
+    p.push_back(point.positions[3]);
+    p.push_back(point.positions[4]);
+    p.push_back(point.positions[5]);
 
     double next_time = point.time_from_start.toSec();
-    hiwin_driver_->writeJointCommand(target_joint_positions_, next_time - last_time);
+
+#ifdef MEASURE_TIMING
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+#endif
+    hiwin_driver_->writeJointCommand(p, next_time - last_time);
+#ifdef MEASURE_TIMING
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    exec_ns = DIFF_NS(start_time, end_time);
+    if (exec_ns > exec_max_ns)
+    {
+      exec_max_ns = exec_ns;
+    }
+    if (exec_ns < exec_min_ns)
+    {
+      exec_min_ns = exec_ns;
+    }
+#endif
+
     last_time = next_time;
   }
+
+#ifdef MEASURE_TIMING
+  ROS_DEBUG("Trajectory points number: %4d, exec(ns): %10u ... %10u", static_cast<int>(point_number), exec_min_ns,
+            exec_max_ns);
+#endif
 
   // robot connect mock
   hardware_interface::ExecutionState final_state;
@@ -177,6 +222,7 @@ void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointT
 void HardwareInterface::cancelInterpolation()
 {
   ROS_DEBUG("Cancelling Trajectory");
+  hiwin_driver_->motionAbort();
 }
 
 }  // namespace hiwin_driver

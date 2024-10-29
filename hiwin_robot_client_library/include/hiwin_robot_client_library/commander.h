@@ -6,7 +6,7 @@
 namespace hrsdk
 {
 
-enum class RobotMode : uint16_t
+enum class ControlMode : uint16_t
 {
   Manual = 0,
   Auto
@@ -45,7 +45,8 @@ public:
 
   int getPermissions();
   int setLogLevel(LogLevels level);
-  int enableRobot();
+  int setServoAmpState(bool& enable);
+  int getServoAmpState(bool& enable);
 
   int getActualRPM(double (&velocities)[6]);
   int getActualPosition(double (&positions)[6]);
@@ -55,13 +56,14 @@ public:
 
   int ptpJoint(double (&positions)[6], double ratio);
   int ptpJointScript(int points_count, double (&positions)[100][6], double ratio);
+  int motionAbort();
   int setPtpSpeed(int ratio);
   int getPtpSpeed(int& ratio);
   int setOverrideRatio(int ratio);
   int getOverrideRatio(int& ratio);
 
-  int setRobotMode(RobotMode mode);
-  int getRobotMode(RobotMode& mode);
+  int setRobotMode(ControlMode mode);
+  int getRobotMode(ControlMode& mode);
   int GetRobotVersion(std::string& str);
 };
 

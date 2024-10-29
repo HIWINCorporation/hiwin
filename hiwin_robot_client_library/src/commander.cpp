@@ -32,11 +32,13 @@ enum class CommandId : uint16_t
   GetPtpSpeed = 0x0098,
   SetOverRideRatio = 0x012C,
   GetOverRideRatio = 0x012D,
-  EnableRobot = 0x0578,
+  SetServoAmp = 0x0578,
+  GetServoAmp = 0x0579,
   GetRobotVersion = 0x057A,
   SetRobotMode = 0x058C,
   GetRobotMode = 0x058D,
   PtpJoint = 0x07D6,
+  MotionAbort = 0x07FA,
   GetActualPosition = 0x0866,
   GetActualRPM = 0x0867,
   GetErrorCode = 0x086C,
@@ -147,14 +149,14 @@ int Commander::setLogLevel(LogLevels level)
   return r.result;
 }
 
-int Commander::enableRobot()
+int Commander::setServoAmpState(bool& enable)
 {
   size_t written;
   Commandformat w = {};
   const uint8_t* data_w = static_cast<const uint8_t*>(static_cast<void*>(&w));
 
-  w.cmd_id = static_cast<uint16_t>(CommandId::EnableRobot);
-  w.param[0] = 1;
+  w.cmd_id = static_cast<uint16_t>(CommandId::SetServoAmp);
+  w.param[0] = static_cast<uint16_t>(enable);
   TCPClient::write(data_w, sizeof(Commandformat), written);
 
   size_t read_chars;
@@ -162,6 +164,30 @@ int Commander::enableRobot()
   uint8_t* data_r = static_cast<uint8_t*>(static_cast<void*>(&r));
 
   TCPClient::read(data_r, sizeof(Responseformat), read_chars);
+  return r.result;
+}
+
+int Commander::getServoAmpState(bool& enable)
+{
+  size_t written;
+  Commandformat w = {};
+  const uint8_t* data_w = static_cast<const uint8_t*>(static_cast<void*>(&w));
+
+  w.cmd_id = static_cast<uint16_t>(CommandId::GetServoAmp);
+  TCPClient::write(data_w, sizeof(Commandformat), written);
+
+  size_t read_chars;
+  Responseformat r = {};
+  uint8_t* data_r = static_cast<uint8_t*>(static_cast<void*>(&r));
+
+  TCPClient::read(data_r, sizeof(Responseformat), read_chars);
+  if (r.result != 0)
+  {
+    return r.result;
+  }
+
+  uint16_t data_length = r.data[0];
+  enable = (r.data[1] > 0) ? true : false;
   return r.result;
 }
 
@@ -300,6 +326,7 @@ int Commander::getErrorCode(std::vector<std::string>& error_code)
   uint16_t count = data_length >> 2;
   uint16_t first, second, thrid;
   char buffer[12];
+  error_code.clear();
   for (size_t i = 0; i < count; i++)
   {
     first = r.data[i * 4 + 4] & 0x00FF;
@@ -379,6 +406,23 @@ int Commander::ptpJointScript(int points_count, double (&positions)[100][6], dou
    */
 
   return -1;
+}
+
+int Commander::motionAbort()
+{
+  size_t written;
+  Commandformat w = {};
+  const uint8_t* data_w = static_cast<const uint8_t*>(static_cast<void*>(&w));
+
+  w.cmd_id = static_cast<uint16_t>(CommandId::MotionAbort);
+  TCPClient::write(data_w, sizeof(Commandformat), written);
+
+  size_t read_chars;
+  Responseformat r = {};
+  uint8_t* data_r = static_cast<uint8_t*>(static_cast<void*>(&r));
+
+  TCPClient::read(data_r, sizeof(Responseformat), read_chars);
+  return r.result;
 }
 
 int Commander::setPtpSpeed(int ratio)
@@ -465,7 +509,7 @@ int Commander::getOverrideRatio(int& ratio)
   return r.result;
 }
 
-int Commander::setRobotMode(RobotMode mode)
+int Commander::setRobotMode(ControlMode mode)
 {
   size_t written;
   Commandformat w = {};
@@ -483,7 +527,7 @@ int Commander::setRobotMode(RobotMode mode)
   return r.result;
 }
 
-int Commander::getRobotMode(RobotMode& mode)
+int Commander::getRobotMode(ControlMode& mode)
 {
   size_t written;
   Commandformat w = {};
@@ -503,7 +547,7 @@ int Commander::getRobotMode(RobotMode& mode)
   }
 
   uint16_t data_length = r.data[0];
-  mode = static_cast<RobotMode>(r.data[1]);
+  mode = static_cast<ControlMode>(r.data[1]);
   return r.result;
 }
 

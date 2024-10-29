@@ -34,7 +34,42 @@ $ source $HOME/catkin_ws/devel/setup.bash
 ```
 
 # Usage
-### Industrial robot simulator
+## Industrial robot simulator
 ```bash
 $ roslaunch hiwin_ra610_1869_moveit_config moveit_planning_execution.launch
+```
+
+## [HIWIN Robot System Software Offline](https://www.hiwinsupport.com/download_center.aspx?pid=MAR)
+
+The HIWIN Robot System Software(HRSS) controls all basic functions for the robot.
+
+Before connecting to the actual robot, we can use HRSS Offline as a substitute to simulate the real robot.
+
+![Alt text](doc/images/hiwin_download_center.png)
+
+### Workstation PC
+
+| Minimum System Requirements| |
+| ------------- | ------------- |
+| Operating System  | Microsoft Windows  |
+|Resolution| 1360 * 768 above
+
+
+### Getting started
+
+Start HRSS Offline, select the type of robot, and press the EXT mode.
+
+<img src="doc/images/hrss_offline_start.png" width="600" />
+
+<img src="doc/images/remote_mode.png" width="600" />
+
+Start the ROS driver and connect to HRSS Offline.
+```bash
+$ roslaunch hiwin_driver ra6_bringup.launch ra_type:=ra610_1869 robot_ip:=<workstation ip>
+```
+
+You can use MoveIt! to control the robot.
+
+```bash
+$ roslaunch hiwin_ra610_1869_moveit_config moveit_planning_execution.launch sim:=false
 ```
