@@ -1,5 +1,5 @@
 /*
- * Copyright 2024, HIWIN Technologies Corp. (refactor)
+ * Copyright 2024, HIWIN Technologies Corp. (trimming)
  *
  * Copyright 2019, FZI Forschungszentrum Informatik (refactor)
  *

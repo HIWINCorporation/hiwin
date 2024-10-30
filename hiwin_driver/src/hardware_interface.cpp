@@ -231,11 +231,6 @@ void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointT
   ROS_DEBUG("Trajectory points number: %4d, exec(ns): %10u ... %10u", static_cast<int>(point_number), exec_min_ns,
             exec_max_ns);
 #endif
-
-  // robot connect mock
-  hardware_interface::ExecutionState final_state;
-  final_state = hardware_interface::ExecutionState::SUCCESS;
-  jnt_traj_interface_.setDone(final_state);
 }
 
 void HardwareInterface::cancelInterpolation()
