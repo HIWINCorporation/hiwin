@@ -1,9 +1,9 @@
 <package>
 
-  <name>hiwin_ra610_1869_moveit_config</name>
+  <name>hiwin_ra605_710_moveit_config</name>
   <version>0.3.0</version>
   <description>
-     An automatically generated package with all the configuration and launch files for using the ra610_1869 with the MoveIt Motion Planning Framework
+     An automatically generated package with all the configuration and launch files for using the ra605_710 with the MoveIt Motion Planning Framework
   </description>
   <author email="hiwin_robot@hiwin.tw">hiwin_robot</author>
   <maintainer email="hiwin_robot@hiwin.tw">hiwin_robot</maintainer>
@@ -36,7 +36,6 @@
   <!-- This package is referenced in the warehouse launch files, but does not build out of the box at the moment. Commented the dependency until this works. -->
   <!-- <run_depend>warehouse_ros_mongo</run_depend> -->
   <run_depend>hiwin_description</run_depend>
-  <run_depend>industrial_robot_simulator</run_depend>
 
 
 </package>

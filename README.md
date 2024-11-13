@@ -6,7 +6,12 @@
 [ROS-Industrial](http://wiki.ros.org/Industrial) HIWIN metapackage.
 
 # Contents
-Branch naming follows the ROS distribution they are compatible with. -devel branches may be unstable. Releases are made from the distribution branches (indigo, kinetic).
+Branch naming corresponds to the compatible ROS distribution. Note that -devel branches may be unstable. Official releases are made from the distribution branches (e.g., indigo, kinetic).
+
+# Compatibility
+HRSS v3.3 or later.
+
+
 
 # Installation
 ### Building from Source
@@ -41,7 +46,7 @@ $ roslaunch hiwin_ra610_1869_moveit_config moveit_planning_execution.launch
 
 The HIWIN Robot System Software(HRSS) controls all basic functions for the robot.
 
-Before connecting to the actual robot, we can use HRSS Offline as a substitute to simulate the real robot.
+Before connecting to the actual robot, HRSS Offline can be used to control a simulated robot.
 
 ![Alt text](doc/images/hiwin_download_center.png)
 
