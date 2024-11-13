@@ -191,6 +191,7 @@ void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointT
   uint32_t exec_min_ns = 0xFFFFFFFF;
 #endif
 
+  hardware_interface::ExecutionState final_state = hardware_interface::ExecutionState::SUCCESS;
   size_t point_number = trajectory.trajectory.points.size();
   double last_time = 0.0;
 
@@ -231,6 +232,7 @@ void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointT
   ROS_DEBUG("Trajectory points number: %4d, exec(ns): %10u ... %10u", static_cast<int>(point_number), exec_min_ns,
             exec_max_ns);
 #endif
+  jnt_traj_interface_.setDone(final_state);
 }
 
 void HardwareInterface::cancelInterpolation()
