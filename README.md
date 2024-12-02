@@ -24,9 +24,9 @@ Follow the steps outlined in the [ROS Noetic installation instructions](https://
 ```bash
 source /opt/ros/noetic/setup.bash
 ```
-3. **Create a ROS 2 Workspace**
+3. **Create a ROS Workspace**
 ```bash
-mkdir -p ~/colcon_ws/src
+mkdir -p $HOME/catkin_ws/src
 ```
 4. **Clone the Repository and Build**
 ```bash
