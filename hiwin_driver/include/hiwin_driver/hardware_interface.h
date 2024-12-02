@@ -24,10 +24,10 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 
-#include <control_msgs/FollowJointTrajectoryAction.h>
+#include <control_msgs/FollowJointTrajectoryGoal.h>
 #include <control_msgs/FollowJointTrajectoryFeedback.h>
 
-#include <forwarding_controllers/trajectory_interface.h>
+#include <forwarding_controllers/joint_trajectory_interface.h>
 
 #include <industrial_robot_status_interface/industrial_robot_status_interface.h>
 
@@ -91,11 +91,10 @@ public:
 
 protected:
   void startJointInterpolation(const control_msgs::FollowJointTrajectoryGoal& trajectory);
-  void cancelInterpolation();
+  void abortMotion();
 
   hardware_interface::JointStateInterface js_interface_;
   hardware_interface::PositionJointInterface pj_interface_;
-  hardware_interface::VelocityJointInterface vj_interface_;
   hardware_interface::JointTrajectoryInterface jnt_traj_interface_;
 
   std::vector<std::string> joint_names_;
@@ -103,6 +102,7 @@ protected:
   std::vector<double> joint_velocities_;
   std::vector<double> joint_efforts_;
   std::vector<double> joint_position_command_;
+  std::vector<double> joint_trajectory_command_;
 
   std::vector<double> target_joint_positions_;
   std::vector<double> target_joint_velocities_;

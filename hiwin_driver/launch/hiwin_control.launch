@@ -1,14 +1,22 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="robot_ip" doc="IP address by which the robot can be reached." />
-    <arg name="tf_prefix" default="" doc="tf_prefix used for the robot." />
-    <arg name="robot_description_file" default="$(find hiwin_description)/launch/load_ra6.launch"
-        doc="Robot description launch file." />
+    <!-- Arguments: Define configurable parameters that can be overridden when launching -->
+    <arg name="name" default="hiwin" /> <!-- Robot name, default is 'hiwin'. -->
+    <arg name="ra_type" default="" doc="Type/series of used HIWIN robot." /> <!-- Type or series of the HIWIN robot. -->
+    <arg name="robot_ip" doc="IP address by which the robot can be reached." /> <!-- IP address for the robot connection. -->
+    <arg name="tf_prefix" default="" doc="tf_prefix used for the robot." /> <!-- tf prefix for namespacing the robot's TF tree. -->
+
+    <!-- Controller configuration file -->
     <arg name="controller_config_file" default="$(find hiwin_driver)/config/ra6_controllers.yaml"
         doc="Config file used for defining the ROS-Control controllers." />
     <arg name="controllers"
-        default="joint_state_controller robot_status_controller forward_joint_traj_controller"
+        default="forward_joint_traj_controller joint_state_controller robot_status_controller"
         doc="Controllers that are activated by default." />
+
+    <!-- Robot model -->
+    <param name="robot_description"
+        command="$(find xacro)/xacro '$(find hiwin_description)/urdf/ra.urdf.xacro' name:=$(arg name) ra_type:=$(arg ra_type)" />
+    <!-- Load the robot's URDF model from a xacro file. -->
 
     <!-- Load hardware interface -->
     <node name="hiwin_hardware_interface" pkg="hiwin_driver" type="hiwin_driver_node"
@@ -18,10 +26,19 @@
 
     <!-- Load controller settings -->
     <rosparam file="$(arg controller_config_file)" command="load" />
+    <!-- Load the ROS Control controller configuration from the specified YAML file. -->
 
-    <!-- spawn controller manager -->
+    <!-- Spawn controller manager -->
     <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"
         respawn="false"
         output="screen" args="$(arg controllers) --timeout 60" />
+    <!-- Start the controller manager and spawn the controllers specified in the 'controllers'
+    argument. -->
+
+    <!-- joint_trajectory_action: provides actionlib interface for 
+	     high-level robot control
+	-->
+    <node name="joint_trajectory_action" pkg="industrial_robot_client"
+        type="joint_trajectory_action" />
 
 </launch>

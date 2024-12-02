@@ -4,7 +4,6 @@ project(hiwin_driver)
 
 find_package(catkin REQUIRED 
   COMPONENTS
-    actionlib
     controller_manager
     forwarding_controllers
     hardware_interface
@@ -20,7 +19,6 @@ catkin_package(
   LIBRARIES 
     hiwin_driver_plugin
   CATKIN_DEPENDS
-    actionlib
     controller_manager
     forwarding_controllers
     hardware_interface

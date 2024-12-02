@@ -24,49 +24,103 @@
 
 #include <controller_interface/controller.h>
 
-#include <actionlib/server/simple_action_server.h>
-
-#include <control_msgs/FollowJointTrajectoryAction.h>
 #include <control_msgs/FollowJointTrajectoryGoal.h>
 #include <control_msgs/FollowJointTrajectoryFeedback.h>
 #include <trajectory_msgs/JointTrajectory.h>
-#include <sensor_msgs/JointState.h>
 #include <industrial_msgs/CmdJointTrajectory.h>
 #include <industrial_msgs/StopMotion.h>
 
-#include <forwarding_controllers/trajectory_interface.h>
+#include <realtime_tools/realtime_buffer.h>
+#include <realtime_tools/realtime_publisher.h>
+
+#include <forwarding_controllers/joint_trajectory_interface.h>
 
 namespace forwarding_controllers
 {
-class JointTrajectoryController : public controller_interface::Controller<hardware_interface::TrajectoryInterface>
+
+/**
+ * @class JointTrajectoryController
+ * @brief A controller to manage joint trajectory execution and feedback.
+ *
+ * This class handles trajectory commands, executes the motions, and provides
+ * feedback on the current state of the joints.
+ */
+class JointTrajectoryController : public controller_interface::Controller<hardware_interface::JointTrajectoryInterface>
 {
 public:
   JointTrajectoryController() = default;
-  virtual ~JointTrajectoryController() override{};
+  virtual ~JointTrajectoryController() override = default;
 
-  bool init(hardware_interface::TrajectoryInterface* hw, ros::NodeHandle& root_node_handle,
+  /**
+   * @brief Initialize the controller with hardware and node handle.
+   * @param hw Pointer to the hardware interface for joint trajectory control.
+   * @param root_nh ROS node handle for general topics.
+   * @param controller_nh ROS node handle for controller-specific parameters.
+   * @return True if initialization succeeds, false otherwise.
+   */
+  bool init(hardware_interface::JointTrajectoryInterface* hw, ros::NodeHandle& root_nh,
             ros::NodeHandle& controller_nh) override;
+
+  /**
+   * @brief Start the controller.
+   * @param time Current time.
+   */
   void starting(const ros::Time& time) override;
+
+  /**
+   * @brief Update the controller during each control loop iteration.
+   * @param time Current time.
+   * @param period Time duration since the last update.
+   */
   void update(const ros::Time& time, const ros::Duration& period) override;
+
+  /**
+   * @brief Stop the controller.
+   * @param time Current time.
+   */
   void stopping(const ros::Time& /*time*/) override;
 
-  void executeCB(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal);
-  void doneCB(const hardware_interface::ExecutionState& state);
+  /**
+   * @brief Handle joint trajectory commands via service.
+   * @param req The service request containing the trajectory command.
+   * @param res The service response with success or failure code.
+   * @return True if the command is handled successfully, false otherwise.
+   */
   bool jointTrajectoryCB(industrial_msgs::CmdJointTrajectory::Request& req,
                          industrial_msgs::CmdJointTrajectory::Response& res);
-  bool stopMotionCB(industrial_msgs::StopMotion::Request& req, industrial_msgs::StopMotion::Response& res);
+
+  /**
+   * @brief Handle joint trajectory commands via topic subscription.
+   * @param msg The incoming trajectory message.
+   */
   void jointTrajectoryCB(const trajectory_msgs::JointTrajectoryConstPtr& msg);
-  void jointStateCB(const sensor_msgs::JointStateConstPtr& msg);
+
+  /**
+   * @brief Handle stop motion requests.
+   * @param req The service request for stopping motion.
+   * @param res The service response with success or failure code.
+   * @return True if the stop request is handled successfully, false otherwise.
+   */
+  bool stopMotionCB(industrial_msgs::StopMotion::Request& req, industrial_msgs::StopMotion::Response& res);
 
 private:
-  hardware_interface::TrajectoryInterface* trajectory_interface_;
-  std::unique_ptr<actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>> action_server_;
+  hardware_interface::JointTrajectoryInterface* joint_trajectory_interface_;
+  std::vector<hardware_interface::JointTrajectoryHandle> joints_;
+  unsigned int num_hw_joints_;
 
-  ros::Subscriber sub_cur_pos_;              // handle for joint-state topic subscription
-  ros::Subscriber sub_joint_trajectory_;     // handle for joint-trajectory topic subscription
-  ros::ServiceServer srv_joint_trajectory_;  // handle for joint-trajectory service
-  ros::ServiceServer srv_stop_motion_;       // handle for stop_motion service
-  ros::Publisher pub_joint_control_state_;
+  std::unique_ptr<realtime_tools::RealtimePublisher<control_msgs::FollowJointTrajectoryFeedback>>
+      pub_joint_control_state_;
+
+  control_msgs::FollowJointTrajectoryGoal command_struct_;
+  realtime_tools::RealtimeBuffer<control_msgs::FollowJointTrajectoryGoal> command_;
+
+  ros::Subscriber sub_joint_trajectory_;
+  ros::ServiceServer srv_joint_trajectory_;
+  ros::ServiceServer srv_stop_motion_;
+
+  double state_publisher_rate_;
+  bool pub_time_initialized_;
+  ros::Time last_state_publish_time_;
 };
 
 }  // namespace forwarding_controllers

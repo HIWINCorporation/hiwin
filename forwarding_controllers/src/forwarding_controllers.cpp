@@ -23,128 +23,129 @@
 
 namespace forwarding_controllers
 {
-bool JointTrajectoryController::init(hardware_interface::TrajectoryInterface* hw, ros::NodeHandle& root_node_handle,
+bool JointTrajectoryController::init(hardware_interface::JointTrajectoryInterface* hw, ros::NodeHandle& root_nh,
                                      ros::NodeHandle& controller_nh)
 {
-  if ((trajectory_interface_ = hw) == nullptr)
+  if ((joint_trajectory_interface_ = hw) == nullptr)
   {
+    ROS_ERROR("JointTrajectoryController: Could not get JointTrajectoryInterface from hardware");
     return false;
   }
 
-  action_server_.reset(new actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>(
-      root_node_handle, "joint_trajectory_action",
-      std::bind(&JointTrajectoryController::executeCB, this, std::placeholders::_1), false));
+  // List of joints to be published
+  std::vector<std::string> joint_names;
 
-  trajectory_interface_->registerDoneCallback(
-      std::bind(&JointTrajectoryController::doneCB, this, std::placeholders::_1));
+  if (controller_nh.getParam("joints", joint_names))
+  {
+    ROS_INFO("Joints parameter specified, publishing specified joints in desired order.");
+  }
+  else
+  {
+    ROS_ERROR_STREAM("Could not find 'joints' parameter (namespace: " << controller_nh.getNamespace() << ").");
+    return false;
+  }
 
-  action_server_->start();
+  num_hw_joints_ = joint_names.size();
+  for (unsigned int i = 0; i < num_hw_joints_; i++)
+  {
+    ROS_DEBUG("Got joint %s", joint_names[i].c_str());
+  }
 
-  sub_cur_pos_ = root_node_handle.subscribe("joint_states", 1, &JointTrajectoryController::jointStateCB, this);
-  sub_joint_trajectory_ =
-      root_node_handle.subscribe("joint_path_command", 0, &JointTrajectoryController::jointTrajectoryCB, this);
+  // get publishing period
+  state_publisher_rate_ = 50.0;
+  controller_nh.getParam("state_publish_rate", state_publisher_rate_);
+
+  // Initialize members
+  joints_.resize(num_hw_joints_);
+  for (unsigned int i = 0; i < num_hw_joints_; ++i)
+  {
+    // Joint handle
+    try
+    {
+      joints_[i] = hw->getHandle(joint_names[i]);
+    }
+    catch (...)
+    {
+      ROS_ERROR_STREAM("Could not find joint '" << joint_names[i] << "' in '" << this->getHardwareInterfaceType()
+                                                << "'.");
+      return false;
+    }
+  }
+
   pub_joint_control_state_ =
-      root_node_handle.advertise<control_msgs::FollowJointTrajectoryFeedback>("feedback_states", 1);
+      std::make_unique<realtime_tools::RealtimePublisher<control_msgs::FollowJointTrajectoryFeedback>>(root_nh,
+                                                                                                       "feedback_"
+                                                                                                       "states",
+                                                                                                       4);
+
+  sub_joint_trajectory_ =
+      root_nh.subscribe("joint_path_command", 0, &JointTrajectoryController::jointTrajectoryCB, this);
 
   srv_joint_trajectory_ =
-      root_node_handle.advertiseService("joint_path_command", &JointTrajectoryController::jointTrajectoryCB, this);
-  srv_stop_motion_ = root_node_handle.advertiseService("stop_motion", &JointTrajectoryController::stopMotionCB, this);
+      root_nh.advertiseService("joint_path_command", &JointTrajectoryController::jointTrajectoryCB, this);
+
+  srv_stop_motion_ = root_nh.advertiseService("stop_motion", &JointTrajectoryController::stopMotionCB, this);
+
+  pub_time_initialized_ = false;
 
   return true;
 }
 
 void JointTrajectoryController::starting(const ros::Time& time)
 {
+  if (!pub_time_initialized_)
+  {
+    try
+    {
+      last_state_publish_time_ = time - ros::Duration(1.001 / state_publisher_rate_);  // ensure publish on first cycle
+    }
+    catch (std::runtime_error& ex)
+    {  // negative ros::Time is not allowed
+      last_state_publish_time_ = ros::Time::MIN;
+    }
+    pub_time_initialized_ = true;
+  }
+
+  command_.initRT(command_struct_);
 }
 
 void JointTrajectoryController::update(const ros::Time& time, const ros::Duration& period)
 {
-  if (action_server_->isActive())
+  command_struct_ = *(command_.readFromRT());
+
+  for (unsigned int i = 0; i < num_hw_joints_; i++)
   {
-    control_msgs::FollowJointTrajectoryFeedback f = trajectory_interface_->getFeedback();
-    action_server_->publishFeedback(f);
+    // joints_[i].getPosition();
+  }
+
+  control_msgs::FollowJointTrajectoryFeedback f = joint_trajectory_interface_->getFeedback();
+
+  if (state_publisher_rate_ > 0.0 && last_state_publish_time_ + ros::Duration(1.0 / state_publisher_rate_) < time)
+  {
+    if (pub_joint_control_state_ && pub_joint_control_state_->trylock())
+    {
+      last_state_publish_time_ += ros::Duration(1.0 / state_publisher_rate_);
+      pub_joint_control_state_->msg_ = f;
+      pub_joint_control_state_->msg_.header.stamp = time;
+      pub_joint_control_state_->unlockAndPublish();
+    }
+  }
+
+  for (unsigned int i = 0; i < num_hw_joints_; i++)
+  {
+    // joints_[i].setCommand();
   }
 }
 
 void JointTrajectoryController::stopping(const ros::Time& /*time*/)
 {
-  if (action_server_->isActive())
-  {
-    trajectory_interface_->setCancel();
-
-    control_msgs::FollowJointTrajectoryResult result;
-    result.error_string = "Controller stopped.";
-    result.error_code = control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
-    action_server_->setAborted(result);
-  }
-}
-
-void JointTrajectoryController::executeCB(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal)
-{
-  if (!this->isRunning())
-  {
-    ROS_ERROR("Can't accept new action goals. Controller is not running.");
-    control_msgs::FollowJointTrajectoryResult result;
-    result.error_code = control_msgs::FollowJointTrajectoryResult::INVALID_GOAL;
-    action_server_->setAborted(result);
-    return;
-  }
-
-  if (!trajectory_interface_->setGoal(*goal))
-  {
-    ROS_ERROR("Trajectory goal is invalid.");
-    control_msgs::FollowJointTrajectoryResult result;
-    result.error_code = control_msgs::FollowJointTrajectoryResult::INVALID_GOAL;
-    action_server_->setAborted(result);
-    return;
-  }
-}
-
-void JointTrajectoryController::doneCB(const hardware_interface::ExecutionState& state)
-{
-  control_msgs::FollowJointTrajectoryResult result;
-
-  if (!action_server_->isActive())
-  {
-    return;
-  }
-
-  switch (state)
-  {
-    case hardware_interface::ExecutionState::ABORTED: {
-      result.error_string = "Trajectory aborted by the robot. Something unexpected happened.";
-      result.error_code = control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
-      action_server_->setAborted(result);
-    }
-    break;
-
-    case hardware_interface::ExecutionState::PREEMPTED: {
-      result.error_string = "Trajectory preempted. Possible reasons: user request | path tolerances fail.";
-      result.error_code = control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
-      action_server_->setPreempted(result);
-    }
-    break;
-
-    case hardware_interface::ExecutionState::SUCCESS: {
-      result.error_string = "Trajectory execution successful";
-      result.error_code = control_msgs::FollowJointTrajectoryResult::SUCCESSFUL;
-      action_server_->setSucceeded(result);
-    }
-    break;
-
-    default:
-      result.error_string = "Trajectory finished in unknown state.";
-      result.error_code = control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED;
-      action_server_->setAborted(result);
-      break;
-  }
+  joint_trajectory_interface_->setCancel();
 }
 
 bool JointTrajectoryController::stopMotionCB(industrial_msgs::StopMotion::Request& req,
                                              industrial_msgs::StopMotion::Response& res)
 {
-  trajectory_interface_->setCancel();
-
+  joint_trajectory_interface_->setCancel();
   res.code.val = industrial_msgs::ServiceReturnCode::SUCCESS;
   return true;
 }
@@ -162,21 +163,19 @@ bool JointTrajectoryController::jointTrajectoryCB(industrial_msgs::CmdJointTraje
 
 void JointTrajectoryController::jointTrajectoryCB(const trajectory_msgs::JointTrajectoryConstPtr& msg)
 {
-  ROS_INFO("Receiving joint trajectory message");
-
-  control_msgs::FollowJointTrajectoryFeedback control_state = trajectory_interface_->getFeedback();
-  pub_joint_control_state_.publish(control_state);
-
   control_msgs::FollowJointTrajectoryGoal goal;
   goal.trajectory.joint_names.insert(goal.trajectory.joint_names.end(), msg->joint_names.begin(),
                                      msg->joint_names.end());
   goal.trajectory.points.insert(goal.trajectory.points.end(), msg->points.begin(), msg->points.end());
 
-  trajectory_interface_->setGoal(goal);
-}
+  if (goal.trajectory.points.empty())
+  {
+    joint_trajectory_interface_->setCancel();
+    return;
+  }
 
-void JointTrajectoryController::jointStateCB(const sensor_msgs::JointStateConstPtr& msg)
-{
+  command_.writeFromNonRT(goal);
+  joint_trajectory_interface_->setGoal(goal);
 }
 
 }  // namespace forwarding_controllers

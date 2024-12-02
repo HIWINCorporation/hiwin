@@ -4,13 +4,14 @@ project(forwarding_controllers)
 
 find_package(catkin REQUIRED 
 COMPONENTS
-  actionlib
   control_msgs
   controller_interface
   hardware_interface
   industrial_msgs
   pluginlib
   roscpp
+  realtime_tools
+  trajectory_msgs
 )
 
 catkin_package(
@@ -18,13 +19,14 @@ catkin_package(
     include
 #  LIBRARIES forwarding_controllers
   CATKIN_DEPENDS
-    actionlib
     control_msgs
     controller_interface
     hardware_interface
     industrial_msgs
     pluginlib
     roscpp
+    realtime_tools
+    trajectory_msgs
 #  DEPENDS system_lib
 )
 

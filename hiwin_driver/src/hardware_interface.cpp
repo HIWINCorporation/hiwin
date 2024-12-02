@@ -38,6 +38,7 @@ HardwareInterface::HardwareInterface()
   , joint_velocities_({ 0, 0, 0, 0, 0, 0 })
   , joint_efforts_({ 0, 0, 0, 0, 0, 0 })
   , joint_position_command_({ 0, 0, 0, 0, 0, 0 })
+  , joint_trajectory_command_({ 0, 0, 0, 0, 0, 0 })
   , target_joint_positions_({ 0, 0, 0, 0, 0, 0 })
   , target_joint_velocities_({ 0, 0, 0, 0, 0, 0 })
 {
@@ -82,20 +83,24 @@ bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
     // Create joint position control interface
     pj_interface_.registerHandle(
         hardware_interface::JointHandle(js_interface_.getHandle(joint_names_[i]), &joint_position_command_[i]));
+
+    // Create joint trajectory control interface
+    jnt_traj_interface_.registerHandle(hardware_interface::JointTrajectoryHandle(
+        js_interface_.getHandle(joint_names_[i]), &joint_trajectory_command_[i]));
   }
+
+  jnt_traj_interface_.registerGoalCallback(
+      std::bind(&HardwareInterface::startJointInterpolation, this, std::placeholders::_1));
+  jnt_traj_interface_.registerCancelCallback(std::bind(&HardwareInterface::abortMotion, this));
 
   robot_status_interface_.registerHandle(industrial_robot_status_interface::IndustrialRobotStatusHandle(
       "industrial_robot_status_handle", robot_status_resource_));
 
-  jnt_traj_interface_.registerGoalCallback(
-      std::bind(&HardwareInterface::startJointInterpolation, this, std::placeholders::_1));
-  jnt_traj_interface_.registerCancelCallback(std::bind(&HardwareInterface::cancelInterpolation, this));
-
   // Register interfaces
   registerInterface(&js_interface_);
-  registerInterface(&robot_status_interface_);
   registerInterface(&pj_interface_);
   registerInterface(&jnt_traj_interface_);
+  registerInterface(&robot_status_interface_);
 
   hiwin_driver_->connect();
 
@@ -134,6 +139,7 @@ void HardwareInterface::read(const ros::Time& time, const ros::Duration& period)
     target_joint_positions_[i] = joint_positions_[i];
     target_joint_velocities_[i] = joint_velocities_[i];
 
+    feedback.joint_names.push_back(joint_names_[i]);
     feedback.desired.positions.push_back(target_joint_positions_[i]);
     feedback.desired.velocities.push_back(target_joint_velocities_[i]);
     feedback.actual.positions.push_back(joint_positions_[i]);
@@ -191,7 +197,6 @@ void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointT
   uint32_t exec_min_ns = 0xFFFFFFFF;
 #endif
 
-  hardware_interface::ExecutionState final_state = hardware_interface::ExecutionState::SUCCESS;
   size_t point_number = trajectory.trajectory.points.size();
   double last_time = 0.0;
 
@@ -232,12 +237,11 @@ void HardwareInterface::startJointInterpolation(const control_msgs::FollowJointT
   ROS_DEBUG("Trajectory points number: %4d, exec(ns): %10u ... %10u", static_cast<int>(point_number), exec_min_ns,
             exec_max_ns);
 #endif
-  jnt_traj_interface_.setDone(final_state);
 }
 
-void HardwareInterface::cancelInterpolation()
+void HardwareInterface::abortMotion()
 {
-  ROS_DEBUG("Cancelling Trajectory");
+  ROS_DEBUG("Abort motion");
   hiwin_driver_->motionAbort();
 }
 
