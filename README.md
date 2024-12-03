@@ -63,6 +63,7 @@ $ source $HOME/catkin_ws/devel/setup.bash
 ## Usage
 ### :warning: **SAFETY FIRST**:warning:
 *It is strongly recommended to test your code in simulation before using it on physical hardware.*
+
 When testing with physical robots, ensure:
 1. Emergency stop functionality is operational.
 2. The workspace is clear of obstacles and personnel.
