@@ -3,15 +3,25 @@
 [![License - apache 2.0](https://img.shields.io/:license-Apache%202.0-yellowgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-[ROS-Industrial](http://wiki.ros.org/Industrial) HIWIN metapackage.
+This is a ROS package developed based on the [ROS-Industrial](http://wiki.ros.org/Industrial) guidelines, designed to support the integration and application development of HIWIN products. The package aims to provide efficient and standardized solutions for industrial robotics.
 
 ## Contents
 This repository follows branch naming aligned with ROS distributions.
 - Stable branches: `indigo`, `kinetic`
 - Development branches: `*-devel` (may be unstable)
 
-## Compatibility
-HRSS v3.3 or later.
+## Features
+- **Best Practices:** Developed in adherence to [ROS-Industrial Training](https://wiki.ros.org/Industrial/Tutorials) guidelines for standardized and efficient robotics integration.
+- **HIWIN Hardware Support:** Optimized for seamless communication and control of HIWIN robotic hardware.
+- **MoveIt Integration:** Enables motion planning, trajectory execution, and manipulation tasks.
+- **Robot Drivers:** Built on top of the [hiwin_robot_client_library](https://github.com/HIWINCorporation/hiwin_ros/tree/noetic-devel/hiwin_robot_client_library) (currently under development) to support position control for HIWIN robots.
+
+## Dependencies 
+To use this package, ensure you have the following dependencies installed:
+- ROS-Industrial Core Packages:
+  - `industrial_core`  
+  - `industrial_msgs`  
+  - `industrial_robot_client`
 
 ## General Requirements
 - **Operating System:** Ubuntu 20.04 LTS
@@ -53,6 +63,10 @@ $ source $HOME/catkin_ws/devel/setup.bash
 ## Usage
 ### :warning: **SAFETY FIRST**:warning:
 *It is strongly recommended to test your code in simulation before using it on physical hardware.*
+When testing with physical robots, ensure:
+1. Emergency stop functionality is operational.
+2. The workspace is clear of obstacles and personnel.
+3. Speed and acceleration limits are properly set.
 
 ---
 
