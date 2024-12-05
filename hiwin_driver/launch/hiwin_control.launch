@@ -18,15 +18,15 @@
         command="$(find xacro)/xacro '$(find hiwin_description)/urdf/ra.urdf.xacro' name:=$(arg name) ra_type:=$(arg ra_type)" />
     <!-- Load the robot's URDF model from a xacro file. -->
 
+    <!-- Load controller settings -->
+    <rosparam file="$(arg controller_config_file)" command="load" />
+    <!-- Load the ROS Control controller configuration from the specified YAML file. -->
+
     <!-- Load hardware interface -->
     <node name="hiwin_hardware_interface" pkg="hiwin_driver" type="hiwin_driver_node"
         output="screen">
         <param name="robot_ip" type="str" value="$(arg robot_ip)" />
     </node>
-
-    <!-- Load controller settings -->
-    <rosparam file="$(arg controller_config_file)" command="load" />
-    <!-- Load the ROS Control controller configuration from the specified YAML file. -->
 
     <!-- Spawn controller manager -->
     <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner"

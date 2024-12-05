@@ -57,18 +57,7 @@ bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
   {
     ROS_ERROR_STREAM("Cannot find required parameter " << robot_hw_nh.resolveName("joints")
                                                        << " on the parameter server.");
-    throw std::runtime_error(
-        "Cannot find required parameter "
-        "'controller_joint_names' on the parameter server.");
-  }
-
-  try
-  {
-    hiwin_driver_.reset(new hrsdk::HIWINDriver(robot_ip_));
-  }
-  catch (const char* msg)
-  {
-    ROS_FATAL_STREAM("...");
+    return false;
   }
 
   // Create ros_control interfaces
@@ -102,6 +91,7 @@ bool HardwareInterface::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw
   registerInterface(&jnt_traj_interface_);
   registerInterface(&robot_status_interface_);
 
+  hiwin_driver_.reset(new hrsdk::HIWINDriver(robot_ip_));
   hiwin_driver_->connect();
 
   return true;

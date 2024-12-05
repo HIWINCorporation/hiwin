@@ -12,16 +12,20 @@ This repository follows branch naming aligned with ROS distributions.
 
 ## Features
 - **Best Practices:** Developed in adherence to [ROS-Industrial Training](https://wiki.ros.org/Industrial/Tutorials) guidelines for standardized and efficient robotics integration.
+- **Integration with `ros_control`:** Provides a well-structured framework and standardized interfaces making it ideal for applications such as robotic arms, mobile robots, and more.
 - **HIWIN Hardware Support:** Optimized for seamless communication and control of HIWIN robotic hardware.
 - **MoveIt Integration:** Enables motion planning, trajectory execution, and manipulation tasks.
-- **Robot Drivers:** Built on top of the [hiwin_robot_client_library](https://github.com/HIWINCorporation/hiwin_ros/tree/noetic-devel/hiwin_robot_client_library) (currently under development) to support position control for HIWIN robots.
+- **Robot Drivers:** Built on top of the [hiwin_robot_client_library](https://github.com/HIWINCorporation/hiwin_robot_client_library) (currently under development) to support position control for HIWIN robots.
 
 ## Dependencies 
 To use this package, ensure you have the following dependencies installed:
-- ROS-Industrial Core Packages:
-  - `industrial_core`  
-  - `industrial_msgs`  
+- ROS Industrial Packages:
   - `industrial_robot_client`
+  - `industrial_robot_simulator`
+- ROS Control packages:
+  - `controller_manager`
+- ROS Controller packages:
+  - `joint_state_controller`
 
 ## General Requirements
 - **Operating System:** Ubuntu 20.04 LTS

@@ -31,7 +31,7 @@
 
 #include <industrial_robot_status_interface/industrial_robot_status_interface.h>
 
-#include <hiwin_robot_client_library/hiwin_driver.h>
+#include <hiwin_robot_client_library/hiwin_driver.hpp>
 
 namespace hiwin_driver
 {
