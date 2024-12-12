@@ -28,11 +28,10 @@
     <!--   - this typically includes: robot_state, motion_interface, and joint_trajectory_action nodes -->
     <!--   - replace these calls with appropriate robot-specific calls or launch files -->
     <group unless="$(arg sim)">
-        <!--
-        <include file="$(find hiwin_ra_support)/launch/robot_interface.launch">
-            <arg name="robot_ip" value="$(arg robot_ip)" />
+        <include file="$(find hiwin_driver)/launch/hiwin_control.launch">
+          <arg name="controller_config_file" value="$(find hiwin_driver)/config/ra6_without_extra_controllers.yaml" />
+          <arg name="robot_ip" value="$(arg robot_ip)" />
         </include>
-        -->
     </group>
 
     <!-- publish the robot state (tf transforms) -->

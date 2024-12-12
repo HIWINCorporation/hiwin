@@ -13,7 +13,7 @@ find_package(catkin REQUIRED
     pluginlib
     roscpp
 )
-find_package(hiwin_robot_client_library REQUIRED)
+find_package(hiwin_robot_client_library 0.0.2 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS 
@@ -47,6 +47,11 @@ add_executable(hiwin_driver_node
 )
 target_link_libraries(hiwin_driver_node ${catkin_LIBRARIES} hiwin_robot_client_library::hrsdk)
 add_dependencies(hiwin_driver_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(joint_states_without_extra_node
+  src/joint_states_without_extra_node.cpp
+)
+target_link_libraries(joint_states_without_extra_node ${catkin_LIBRARIES})
 
 install(TARGETS hiwin_driver_plugin hiwin_driver_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

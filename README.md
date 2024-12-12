@@ -86,7 +86,7 @@ $ roslaunch hiwin_ra610_1869_moveit_config moveit_planning_execution.launch sim:
 ### Real Robot Control
 To connect to and control a physical robot:
 ```bash
-$ roslaunch hiwin_driver hiwin_control.launch ra_type:=ra610_1869 robot_ip:=<robot ip>
+$ roslaunch hiwin_driver ra6_bringup.launch ra_type:=ra610_1869 robot_ip:=<robot ip>
 ```
 
 ---
@@ -110,15 +110,9 @@ The **HIWIN Robot System Software (HRSS)** provides tools for offline simulation
      ![HRSS Start](doc/images/hrss_offline_start.png)
      ![Remote Mode](doc/images/remote_mode.png)
 
-3. **Connect to HRSS Simulator**  
-   Launch the ROS node and replace `robot_ip` with your workstation's IP address:
+3. **Control the Simulated Robot with MoveIt!**  
    ```bash
-   roslaunch hiwin_driver hiwin_control.launch ra_type:=ra610_1869 robot_ip:=<workstation ip>
-   ```
-
-4. **Control the Simulated Robot with MoveIt!**  
-   ```bash
-   roslaunch hiwin_ra610_1869_moveit_config moveit_planning_execution.launch sim:=false
+   roslaunch hiwin_ra610_1869_moveit_config moveit_planning_execution.launch sim:=false robot_ip:=<workstation ip>
    ```
 
 ---

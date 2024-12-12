@@ -1,22 +1,13 @@
 <?xml version="1.0"?>
 <launch>
-    <!-- Arguments: Define configurable parameters that can be overridden when launching -->
-    <arg name="name" default="hiwin" /> <!-- Robot name, default is 'hiwin'. -->
-    <arg name="ra_type" default="" doc="Type/series of used HIWIN robot." /> <!-- Type or series of the HIWIN robot. -->
-    <arg name="robot_ip" doc="IP address by which the robot can be reached." /> <!-- IP address for the robot connection. -->
-    <arg name="tf_prefix" default="" doc="tf_prefix used for the robot." /> <!-- tf prefix for namespacing the robot's TF tree. -->
-
+    <!-- IP address for the robot connection. -->
+    <arg name="robot_ip" doc="IP address by which the robot can be reached." />
     <!-- Controller configuration file -->
-    <arg name="controller_config_file" default="$(find hiwin_driver)/config/ra6_controllers.yaml"
+    <arg name="controller_config_file"
         doc="Config file used for defining the ROS-Control controllers." />
     <arg name="controllers"
         default="forward_joint_traj_controller joint_state_controller robot_status_controller"
         doc="Controllers that are activated by default." />
-
-    <!-- Robot model -->
-    <param name="robot_description"
-        command="$(find xacro)/xacro '$(find hiwin_description)/urdf/ra.urdf.xacro' name:=$(arg name) ra_type:=$(arg ra_type)" />
-    <!-- Load the robot's URDF model from a xacro file. -->
 
     <!-- Load controller settings -->
     <rosparam file="$(arg controller_config_file)" command="load" />
@@ -40,5 +31,10 @@
 	-->
     <node name="joint_trajectory_action" pkg="industrial_robot_client"
         type="joint_trajectory_action" />
+
+    <node name="joint_states_without_extra" pkg="hiwin_driver"
+        type="joint_states_without_extra_node"
+        output="screen">
+    </node>
 
 </launch>
