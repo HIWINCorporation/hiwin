@@ -26,9 +26,7 @@
     <!-- Start the controller manager and spawn the controllers specified in the 'controllers'
     argument. -->
 
-    <!-- joint_trajectory_action: provides actionlib interface for 
-	     high-level robot control
-	-->
+    <!-- joint_trajectory_action: provides actionlib interface for high-level robot control -->
     <node name="joint_trajectory_action" pkg="industrial_robot_client"
         type="joint_trajectory_action" />
 
