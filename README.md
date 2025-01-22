@@ -101,7 +101,7 @@ The **HIWIN Robot System Software (HRSS)** provides tools for offline simulation
 | **Screen Resolution** | 1360x768 or higher       |
 
 #### Steps
-1. **Download HRSS Offline**  
+1. **Download HRSS Offline**  +
    Obtain the software from the [HIWIN Download Center](https://www.hiwinsupport.com/download_center.aspx?pid=MAR).
 
 2. **Start HRSS Offline**  
