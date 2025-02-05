@@ -114,8 +114,4 @@ The **HIWIN Robot System Software (HRSS)** provides tools for offline simulation
    ```bash
    roslaunch hiwin_ra610_1869_moveit_config moveit_planning_execution.launch sim:=false robot_ip:=<workstation ip>
    ```
-
--
-----
--
-----
+  
